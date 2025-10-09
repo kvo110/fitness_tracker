@@ -1,3 +1,6 @@
+- Wednesday Oct 8;
+    - Took some implementations and code methods from previous assignments such as dark/light mode toggle and navigation bar.
+
 
 AI use log;
 - Wednesday Oct 8;
