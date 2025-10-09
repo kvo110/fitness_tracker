@@ -10,19 +10,28 @@ import 'screens/settings_screen.dart';
 // import widgets
 import 'widgets/nav_bar.dart';
 
+// Entry point of the Fitness App
 void main() {
   runApp(const FitnessApp());
 }
 
+// Widget that manages app theme and navigation
 class FitnessApp extends StatefulWidget {
-  int _index = 0;
-  bool _isDark = false;
+  const FitnessApp({super.key});
 
-  late final List<Widget> _tabs;
+  @override
+  State<FitnessApp> createState() => _FitnessAppState();
+}
+
+class _FitnessAppState extends State<FitnessApp> {
+  int _index = 0; // Tracks current tab index
+  bool _isDark = false; // Light/Dark mode toggle
+  late final List<Widget> _tabs; // List of pages displayed in the nav bar
 
   @override
   void initState() {
     super.initState();
+    // Define each screen in the nav bar 
     _tabs = [
       HomeScreen(
         onOpenWorkout: () => setState(() => _index = 1),
@@ -40,13 +49,14 @@ class FitnessApp extends StatefulWidget {
 
   @override
   Widget build(BuildContext_context) {
+    // Light theme mode
     final light = ThemeData(
       brightness: Brightness.light,
       useMaterial3: true,
       scaffoldBackgroundColor: Colors.grey[200],
       colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
     );
-
+    // Dark theme mode
     final dark = ThemeData(
       brightness: Brightness.dark,
       useMaterial3: true,
@@ -61,10 +71,12 @@ class FitnessApp extends StatefulWidget {
       title: 'Fitness Tracker App',
       theme: light,
       darkTheme: dark,
+      // Switch theme based on toggled option in the settings screen
       themeMode: _isDark ? ThemeMode.dark : ThemeMode.light,
       home: Scaffold(
-        extendBody: true,
-        body: _tabs[_index],
+        extendBody: true, // Creates the floating effect of the nav bar
+        body: _tabs[_index], 
+        // Bottom nav bar
         bottomNavigationBar: NavBar(
           currentIndex: _index,
           onTap: (i) => setState(() => _index = i),
