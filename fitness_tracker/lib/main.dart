@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 // importing the screens files
 import 'screens/home_screen.dart';
-import 'screnns/workout_screen.dart';
+import 'screens/workout_screen.dart';
 import 'screens/calorie_screen.dart';
 import 'screens/progress_screen.dart';
 import 'screens/settings_screen.dart';
@@ -62,8 +62,7 @@ class _FitnessAppState extends State<FitnessApp> {
         onPrimary: Colors.white,
         onSecondary: Colors.white,
       ),
-      textTheme: const TextTheme(
-        bodyMedium: TextStyle(color: Colors.black),
+      textTheme: const TextTheme(bodyMedium: TextStyle(color: Colors.black),
       ),
     );
     // Dark theme mode
@@ -79,8 +78,7 @@ class _FitnessAppState extends State<FitnessApp> {
         onPrimary: Colors.white,
         onSecondary: Colors.white,
       ),
-      textTheme: const TextTheme(
-        bodyMedium: TextStyle(color: Colors.white),
+      textTheme: const TextTheme(bodyMedium: TextStyle(color: Colors.white),
       ),
     );
 
