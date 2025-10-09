@@ -26,7 +26,7 @@ class WorkoutScreen extends StatefulWidget {
 }
 
 class _WorkoutScreenState extends State<WorkoutScreen> {
-    final _formKey = GlobalKey<FromState>();
+    final _formKey = GlobalKey<FormState>();
     final _typeCtrl = TextEditingController();
     final _setsCtrl = TextEditingController(text: '0');
     final _repsCtrl = TextEditingController(text: '0');
@@ -45,7 +45,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                     sets: int.tryParse(_setsCtrl.text) ?? 0,
                     reps: int.tryParse(_repsCtrl.text) ?? 0,
                     durationMin: int.parse(_durCtrl.text),
-                    dateL DateTime.now(),
+                    date: DateTime.now(),
                 ),
             );
             _typeCtrl.clear();
