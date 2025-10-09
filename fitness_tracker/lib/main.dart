@@ -53,16 +53,34 @@ class _FitnessAppState extends State<FitnessApp> {
     final light = ThemeData(
       brightness: Brightness.light,
       useMaterial3: true,
-      scaffoldBackgroundColor: Colors.grey[200],
-      colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+      scaffoldBackgroundColor: const Color(0xFFF2F2F2),
+      colorScheme: const ColorScheme.light(
+        primary: Color(0xFF1E88E5), // Bright blue color
+        secondary: Colors.blueAccent,
+        surface: Colors.white,
+        onSurface: Colors.black,
+        onPrimary: Colors.white,
+        onSecondary: Colors.white,
+      ),
+      textTheme: const TextTheme(
+        bodyMedium: TextStyle(color: Colors.black),
+      ),
     );
     // Dark theme mode
     final dark = ThemeData(
       brightness: Brightness.dark,
       useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: Colors.teal,
-        brightness: Brightness.dark,
+      scaffoldBackgroundColor: const Color(0xFF1E1E1E),
+      colorScheme: const ColorScheme.dark(
+        primary: Color(0xFF0D47A1), // darker blue
+        secondary: Color(0xFF1565C0),
+        surface: Color(0xFF2B2B2B),
+        onSurface: Colors.white,
+        onPrimary: Colors.white,
+        onSecondary: Colors.white,
+      ),
+      textTheme: const TextTheme(
+        bodyMedium: TextStyle(color: Colors.white),
       ),
     );
 
