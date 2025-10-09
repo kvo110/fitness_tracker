@@ -13,29 +13,55 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final bgColor = isLight ? Colors.white : Colors.grey[850];
+    final textColor = isLight ? Colors.black : Colors.white;
+
     return SafeArea(
       child: ListView(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
         children: [
-          // Title
-          Text(
-            'Fitness Tracker',
-            style: Theme.of(context).textTheme.headlineMedium,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-
-          // Subtitle
-          Text(
-            'Track workouts, calories, and see your progress.',
-            textAlign: TextAlign.center,
+          // Title and Subtitle 
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+            decoration: BoxDecoration(
+              color: bgColor,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: isLight
+                      ? Colors.black.withOpacity(0.1)
+                      : Colors.white.withOpacity(0.15),
+                  blurRadius: 10,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                Text(
+                  'Fitness Tracker',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        color: textColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Track workouts, calories, and see your progress.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: textColor.withOpacity(0.8)),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 20),
 
-          // 🖼️ App header image
+          // App header image
           Center(
             child: Image.asset(
-              'assets/images/homescreen.png', // Path inside assets/images/
+              'assets/images/homescreen.png', 
               height: 140,
               fit: BoxFit.contain,
             ),
@@ -72,7 +98,6 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // Reusable info card widget
   Widget _infoCard(BuildContext context, String title, String text) {
     return Container(
       padding: const EdgeInsets.all(16),

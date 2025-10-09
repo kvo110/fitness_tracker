@@ -26,29 +26,9 @@ class FitnessApp extends StatefulWidget {
 class _FitnessAppState extends State<FitnessApp> {
   int _index = 0; // Tracks current tab index
   bool _isDark = false; // Light/Dark mode toggle
-  late final List<Widget> _tabs; // List of pages displayed in the nav bar
 
   @override
-  void initState() {
-    super.initState();
-    // Define each screen in the nav bar 
-    _tabs = [
-      HomeScreen(
-        onOpenWorkout: () => setState(() => _index = 1),
-        onOpenCalories: () => setState(() => _index = 2),
-      ),
-      const WorkoutScreen(),
-      const CalorieScreen(),
-      const ProgressScreen(),
-      SettingsScreen(
-        isDark: _isDark,
-        onToggleTheme: (v) => setState(() => _isDark = v),
-      ),
-    ];
-  }
-
-  @override
-  Widget build(BuildContext_context) {
+  Widget build(BuildContext context) {
     // Light theme mode
     final light = ThemeData(
       brightness: Brightness.light,
@@ -62,9 +42,11 @@ class _FitnessAppState extends State<FitnessApp> {
         onPrimary: Colors.white,
         onSecondary: Colors.white,
       ),
-      textTheme: const TextTheme(bodyMedium: TextStyle(color: Colors.black),
+      textTheme: const TextTheme(
+        bodyMedium: TextStyle(color: Colors.black),
       ),
     );
+
     // Dark theme mode
     final dark = ThemeData(
       brightness: Brightness.dark,
@@ -78,9 +60,25 @@ class _FitnessAppState extends State<FitnessApp> {
         onPrimary: Colors.white,
         onSecondary: Colors.white,
       ),
-      textTheme: const TextTheme(bodyMedium: TextStyle(color: Colors.white),
+      textTheme: const TextTheme(
+        bodyMedium: TextStyle(color: Colors.white),
       ),
     );
+
+    // Define each screen in the nav bar 
+    final List<Widget> tabs = [
+      HomeScreen(
+        onOpenWorkout: () => setState(() => _index = 1),
+        onOpenCalories: () => setState(() => _index = 2),
+      ),
+      const WorkoutScreen(),
+      const CalorieScreen(),
+      const ProgressScreen(),
+      SettingsScreen(
+        isDark: _isDark,
+        onToggleTheme: (v) => setState(() => _isDark = v),
+      ),
+    ];
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -91,7 +89,7 @@ class _FitnessAppState extends State<FitnessApp> {
       themeMode: _isDark ? ThemeMode.dark : ThemeMode.light,
       home: Scaffold(
         extendBody: true, // Creates the floating effect of the nav bar
-        body: _tabs[_index], 
+        body: tabs[_index],
         // Bottom nav bar
         bottomNavigationBar: NavBar(
           currentIndex: _index,

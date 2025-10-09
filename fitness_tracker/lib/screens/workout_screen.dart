@@ -71,7 +71,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
           if (_workouts.isEmpty)
             const Padding(
               padding: EdgeInsets.only(top: 8),
-              child: Text('No workouts yet — add your first above!'),
+              child: Text('No workouts yet — Add your first above'),
             ),
           // Display logged workouts
           ...List.generate(_workouts.length, (i) {
