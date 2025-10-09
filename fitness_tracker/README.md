@@ -1,16 +1,10 @@
-# fitness_tracker
 
-A new Flutter project.
+AI use log;
+- Wednesday Oct 8;
+    - Cleaned up spelling errors
+    - Realign sections for easier reading 
+    - Find color codes for theme colors
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- Thursday Oct 9;
+    -  Help fix Dark/Light Mode toggle; unable to switch back to light mode after switching to dark mode
+    
