@@ -21,7 +21,7 @@ class HomeScreen extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
         children: [
-          // Title and Subtitle 
+          // Title and Subtitle for home/introduction page
           Container(
             padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
             decoration: BoxDecoration(
@@ -41,6 +41,7 @@ class HomeScreen extends StatelessWidget {
               children: [
                 Text(
                   'Fitness Tracker',
+                  // Formatting of the text
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         color: textColor,
                         fontWeight: FontWeight.bold,
@@ -58,7 +59,7 @@ class HomeScreen extends StatelessWidget {
           ),
           const SizedBox(height: 20),
 
-          // App header image
+          // Displays image for the homepage of the application
           Center(
             child: Image.asset(
               'assets/images/homescreen.png', 
@@ -72,6 +73,7 @@ class HomeScreen extends StatelessWidget {
           // Quick action buttons
           Row(
             children: [
+            // Button to send you to the workout log screen
               Expanded(
                 child: ElevatedButton.icon(
                   onPressed: onOpenWorkout,
@@ -80,6 +82,7 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
+              // Button to send you to the calorie tracker screen
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: onOpenCalories,
@@ -92,7 +95,7 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(height: 24),
 
           // Motivational tip
-          _infoCard(context, 'Tip of the Day', 'Stay consistent — even short workouts count 💪'),
+          _infoCard(context, 'Tip of the Day', '1% growth per day is better than 0% growth'),
         ],
       ),
     );

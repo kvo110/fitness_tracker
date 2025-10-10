@@ -15,7 +15,7 @@ class ProgressScreen extends StatelessWidget {
             const SizedBox(height: 20),
             Text('Progress Dashboard', style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 8),
-            const Text('Charts will be dynamic in Milestone 2 📈'),
+            const Text('Charts will be dynamic in Milestone 2'),
           ],
         ),
       ),

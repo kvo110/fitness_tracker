@@ -24,7 +24,7 @@ class SettingsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 24),
 
-          // Theme mode toggle
+          // Theme mode toggle with title and subtitle change based on current mode
           SwitchListTile(
             title: Text(
               isDark ? 'Dark Mode Enabled' : 'Light Mode Enabled',
