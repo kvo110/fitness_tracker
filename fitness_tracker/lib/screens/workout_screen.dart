@@ -17,7 +17,7 @@ class WorkoutItem {
     });
 }
 
-// Screen to log your workouts
+// Screen to log your workouts sets, reps, and duration (in minutes)
 class WorkoutScreen extends StatefulWidget {
     const WorkoutScreen({super.key});
 
@@ -55,98 +55,105 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         });
     }
 
-    // Delete workout
-  void _deleteWorkout(int index) => setState(() => _workouts.removeAt(index));
+    // Delete workouts that user no longer wants to track
+    void _deleteWorkout(int index) => setState(() => _workouts.removeAt(index));
 
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
-        children: [
-          Text('Workout Log', style: Theme.of(context).textTheme.headlineMedium),
-          const SizedBox(height: 12),
-          _buildForm(),
-          const SizedBox(height: 16),
-          if (_workouts.isEmpty)
-            const Padding(
-              padding: EdgeInsets.only(top: 8),
-              child: Text('No workouts yet — Add your first above'),
-            ),
-          // Display logged workouts
-          ...List.generate(_workouts.length, (i) {
-            final w = _workouts[i];
-            return Dismissible(
-              key: ValueKey('${w.type}-${w.date}-$i'),
-              direction: DismissDirection.endToStart,
-              background: Container(
-                alignment: Alignment.centerRight,
-                padding: const EdgeInsets.only(right: 20),
-                color: Colors.red,
-                child: const Icon(Icons.delete, color: Colors.white),
-              ),
-              onDismissed: (_) => _deleteWorkout(i),
-              child: ListTile(
-                leading: CircleAvatar(child: Text(w.type[0].toUpperCase())),
-                title: Text('${w.type} — ${w.durationMin} min'),
-                subtitle: Text('Sets: ${w.sets}, Reps: ${w.reps}'),
-              ),
-            );
-          }),
-        ],
-      ),
-    );
-  }
+    @override
+    Widget build(BuildContext context) {
+        return SafeArea(
+            child: ListView(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
+                children: [
+                    Text('Workout Log', style: Theme.of(context).textTheme.headlineMedium),
+                    const SizedBox(height: 12),
+                    _buildForm(),
 
-  // Workout input form
-  Widget _buildForm() {
-    return Form(
-      key: _formKey,
-      child: Column(children: [
-        TextFormField(
-          controller: _typeCtrl,
-          decoration: const InputDecoration(labelText: 'Workouts'),
-          validator: (v) => v!.isEmpty ? 'Enter a workout' : null,
-        ),
-        const SizedBox(height: 8),
-        Row(children: [
-          Expanded(
-            child: TextFormField(
-              controller: _setsCtrl,
-              decoration: const InputDecoration(labelText: 'Sets'),
-              keyboardType: TextInputType.number,
+                    const SizedBox(height: 16),
+                    
+                    if (_workouts.isEmpty)
+                    const Padding(
+                        padding: EdgeInsets.only(top: 8),
+                        child: Text('No workouts yet — Add your first above'),
+                    ),
+                    // Display logged workouts
+                    ...List.generate(_workouts.length, (i) {
+                        final w = _workouts[i];
+                        return Dismissible(
+                            key: ValueKey('${w.type}-${w.date}-$i'),
+                            direction: DismissDirection.endToStart,
+                            background: Container(
+                                alignment: Alignment.centerRight,
+                                padding: const EdgeInsets.only(right: 20),
+                                color: Colors.red,
+                                child: const Icon(Icons.delete, color: Colors.white),
+                            ),
+                            onDismissed: (_) => _deleteWorkout(i),
+                            child: ListTile(
+                                leading: CircleAvatar(child: Text(w.type[0].toUpperCase())),
+                                title: Text('${w.type} — ${w.durationMin} min'),
+                                subtitle: Text('Sets: ${w.sets}, Reps: ${w.reps}'),
+                            ),
+                        );
+                    }),
+                ],
             ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: TextFormField(
-              controller: _repsCtrl,
-              decoration: const InputDecoration(labelText: 'Reps'),
-              keyboardType: TextInputType.number,
-            ),
-          ),
-        ]),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: _durCtrl,
-          decoration: const InputDecoration(labelText: 'Duration (min)'),
-          keyboardType: TextInputType.number,
-          validator: (v) {
-            final n = int.tryParse(v ?? '');
-            if (n == null || n <= 0) return 'Invalid Input: Please input duration (in Minutes)';
-            return null;
-          },
-        ),
-        const SizedBox(height: 12),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton.icon(
-            onPressed: _addWorkout,
-            icon: const Icon(Icons.add),
-            label: const Text('Add Workout'),
-          ),
-        ),
-      ]),
-    );
-  }  
+        );
+    }
+
+    // Workout input screen
+    Widget _buildForm() {
+        return Form(
+            key: _formKey,
+            child: Column(children: [
+                // User inputs their workout
+                TextFormField(
+                controller: _typeCtrl,
+                decoration: const InputDecoration(labelText: 'Workouts'),
+                validator: (v) => v!.isEmpty ? 'Enter a workout' : null,
+                ),
+                const SizedBox(height: 8),
+                Row(children: [
+                    // User enter number of sets
+                    Expanded(
+                        child: TextFormField(
+                        controller: _setsCtrl,
+                        decoration: const InputDecoration(labelText: 'Sets'),
+                        keyboardType: TextInputType.number,
+                        ),
+                    ),
+                    const SizedBox(width: 12),
+                    // User enter number of reps 
+                    Expanded(
+                        child: TextFormField(
+                        controller: _repsCtrl,
+                        decoration: const InputDecoration(labelText: 'Reps'),
+                        keyboardType: TextInputType.number,
+                        ),
+                    ),
+                ]),
+                const SizedBox(height: 8),
+                // User enter the duration of their workout
+                TextFormField(
+                    controller: _durCtrl,
+                    decoration: const InputDecoration(labelText: 'Duration (min)'),
+                    keyboardType: TextInputType.number,
+                    validator: (v) {
+                        final n = int.tryParse(v ?? '');
+                        if (n == null || n <= 0) return 'Invalid Input: Please input duration (in Minutes)';
+                        return null;
+                    },
+                ),
+                const SizedBox(height: 12),
+                // User presses the '+' icon to navigate to the Add Workout screen
+                SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                        onPressed: _addWorkout,
+                        icon: const Icon(Icons.add),
+                        label: const Text('Add Workout'),
+                    ),
+                ),
+            ]),
+        );
+    }  
 }
