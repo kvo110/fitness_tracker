@@ -18,6 +18,9 @@
         final TextEditingController _repsController = TextEditingController();
         final TextEditingController _durationController = TextEditingController();
 
+        // Select RPE value
+        String? _selectedRPE;
+
         // Add workout to list
         void _addWorkout() {
             if (_exerciseController.text.isEmpty ||
@@ -125,6 +128,28 @@
                                             prefixIcon: Icon(Icons.timer),
                                         ),
                                     ),
+                                    const SizedBox(height: 10),
+
+                                    // Dropdown menu for rep intensity (RPE) with a 1-10 scale, 1 being effortless and 10 being highly difficult (unable to do another rep)
+                                    DropdownButtonFormField<String> (
+                                        value: _selectedRPE,
+                                        decoration: const InputDecoration(
+                                            labelText: 'Intesity (RPE)',
+                                            prefixIcon: Icon(Icons.bolt),
+                                        ),
+                                        items: List.generate(
+                                            10, (i) => DropdownMenuItem(
+                                                value: '${i + 1}',
+                                                child: Text('RPE ${i + 1} - ${_rpeDescriptions[i]}'),
+                                            ),
+                                        ),
+                                        onChanged: (value) {
+                                            setState(() {
+                                                _selectedRPE = value;
+                                            });
+                                        },
+                                    ),
+
                                     const SizedBox(height: 12),
                                     ElevatedButton.icon(
                                         onPressed: _addWorkout,
@@ -160,7 +185,7 @@
                                         ),
                                     ),
                                 )
-                                
+
                                 : ListView.builder(
                                     itemCount: _workouts.length,
                                     itemBuilder: (context, index) {
@@ -183,7 +208,7 @@
                                                 elevation: 3,
                                                 child: ListTile(
                                                     title: Text(w['exercise']),
-                                                    subtitle: Text('${w['sets']} sets × ${w['reps']} reps\nDuration: ${w['duration']} min'),
+                                                    subtitle: Text('${w['sets']} sets × ${w['reps']} reps\nDuration: ${w['duration']} min\nRPE: ${w['rpe']}'),
                                                     trailing: IconButton(
                                                         icon: const Icon(Icons.delete_outline),
                                                         onPressed: () => _deleteWorkout(index),
@@ -200,6 +225,20 @@
             ),
         );
     }
+
+    // RPE description for user to understand what each RPE means
+    static const List<String> _rpeDescriptions = [
+        'Very Easy',
+        'Easy',
+        'Moderate',
+        'Somewhat Hard',
+        'Hard',
+        'Challenging',
+        'Very Challenging',
+        'Intense',
+        'Highly Intense',
+        'Max Effort',
+    ];
 
     @override
     void dispose() {
