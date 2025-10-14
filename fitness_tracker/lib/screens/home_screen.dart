@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 
 // Home dashboard screen
 class HomeScreen extends StatelessWidget {
-    final VoidCallback onOpenWorkout;
-    final VoidCallback onOpenCalories;
+    final VoidCallback onOpenWorkout; // navigate to workout screen
+    final VoidCallback? onOpenCalories; // navigate to calorie screen
 
     const HomeScreen({
         super.key,
         required this.onOpenWorkout,
-        required this.onOpenCalories,
+        this.onOpenCalories,
     });
 
     @override
@@ -77,7 +77,7 @@ class HomeScreen extends StatelessWidget {
                                 label: const Text('Workout Log'),
                                 ),
                             ),
-                            const SizedBox(width: 12),
+                            /* const SizedBox(width: 12),
                             // Button to send you to the calorie tracker screen
                             Expanded(
                                 child: OutlinedButton.icon(
@@ -85,7 +85,7 @@ class HomeScreen extends StatelessWidget {
                                 icon: const Icon(Icons.local_dining),
                                 label: const Text('Calorie Tracker'),
                                 ),
-                            ),
+                            ), */
                         ],
                     ),
                     const SizedBox(height: 24),
