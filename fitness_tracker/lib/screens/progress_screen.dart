@@ -134,7 +134,30 @@ class ProgressScreen extends StatelessWidget {
                                             'Summary Overview',
                                             style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: textColor),
                                         ),
+
                                         const SizedBox(height: 8),
+
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            IconButton(
+                                              icon: const Icon(Icons.local_dining, size: 48),
+                                              onPressed: () {
+                                              },
+                                            ),
+                                            IconButton(
+                                              icon: const Icon(Icons.calendar_today, size: 48),
+                                              onPressed: () {
+                                              },
+                                            ),
+                                            IconButton(
+                                              icon: const Icon(Icons.show_chart, size: 48),
+                                              onPressed: () {
+                                              },
+                                            ),
+                                          ],
+                                        ),
+
                                         Text(
                                             'Stay Disciplined\nPay the price now to enjoy the prize later',
                                             textAlign: TextAlign.center,
