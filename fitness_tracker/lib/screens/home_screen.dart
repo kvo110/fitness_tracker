@@ -108,13 +108,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                         ),
                         const SizedBox(width: 12),
-                        Expanded(
-                            child: OutlinedButton.icon(
-                                onPressed: widget.onOpenCalories,
-                                icon: const Icon(Icons.local_dining),
-                                label: const Text('Calorie Tracker'),
-                            ),
-                        ),
                     ],
                 ),
                 const SizedBox(height: 24),
