@@ -21,8 +21,7 @@ class ProgressScreen extends StatelessWidget {
                 backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                 body: Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                    child: ListView(
                         children: [
                             Text(
                                 'Weekly Workout Progress',
