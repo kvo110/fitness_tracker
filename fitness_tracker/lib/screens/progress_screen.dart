@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'calorie_screen.dart';
 
 // Static progress chart placeholder for Milestone 1
 class ProgressScreen extends StatelessWidget {
-    const ProgressScreen({super.key});
+    const ProgressScreen({super.key, this.onOpenCalories,});
+    final VoidCallback? onOpenCalories;
 
     @override
     Widget build(BuildContext context) {
@@ -142,6 +144,10 @@ class ProgressScreen extends StatelessWidget {
                                             IconButton(
                                               icon: const Icon(Icons.local_dining, size: 48),
                                               onPressed: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(builder: (context) => const CalorieScreen()),
+                                                );
                                               },
                                             ),
                                             IconButton(

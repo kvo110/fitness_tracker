@@ -37,11 +37,13 @@ class _CalorieScreenState extends State<CalorieScreen> {
 
     @override
     Widget build(BuildContext context) {
-        return SafeArea(
-            child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
-                children: [
-                    Text('Calorie Tracker', style: Theme.of(context).textTheme.headlineMedium),
+        return Scaffold(
+            appBar: AppBar(title: const Text('Calorie Tracker')),
+            body: SafeArea(
+                child: ListView(
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
+                    children: [
+                        Text('Calorie Tracker', style: Theme.of(context).textTheme.headlineMedium),
                     const SizedBox(height: 12),
                     TextFormField(
                         controller: _foodCtrl,
@@ -82,6 +84,6 @@ class _CalorieScreenState extends State<CalorieScreen> {
                     }),
                 ],
             ),
-        );
+        ));
     }
 }
