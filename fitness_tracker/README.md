@@ -18,6 +18,10 @@ AI use log; (ChatGPT)
     -  Help fix Dark/Light Mode toggle; unable to switch back to light mode after switching to dark mode
         - Can you help me determine why my Theme Mode toggle is not working based on my code for the home_screen and settings_screen?
 
-
+- Thursday Oct 16;
+    - Asked "how can I add an interactable calendar in flutter", "how can I mark certain parts of the calendar", and a lot of debugging on setting up and             marking
+    - Showed the dependency for creating calendars and examples
+    - Showed how to set up icons for marking and customization options
+    - Used the dependency to create my own calendar and allow the users to check in to mark days
 
     
