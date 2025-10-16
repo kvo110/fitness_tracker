@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'calorie_screen.dart';
+import 'calendar_screen.dart';
+import 'trends_screen.dart';
 
 // Static progress chart placeholder for Milestone 1
 class ProgressScreen extends StatelessWidget {

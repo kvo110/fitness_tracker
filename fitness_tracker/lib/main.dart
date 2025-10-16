@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 // importing the screens files
 import 'screens/home_screen.dart';
 import 'screens/workout_logs_screen.dart';
-import 'screens/calorie_screen.dart';
 import 'screens/progress_screen.dart';
 import 'screens/settings_screen.dart';
 
