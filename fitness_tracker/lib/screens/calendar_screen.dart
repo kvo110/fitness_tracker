@@ -104,6 +104,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 ),
               ),
 
+              const SizedBox(height: 10),
+
               // Remove check in button
               ElevatedButton(
                 onPressed: () {
