@@ -155,6 +155,10 @@ class ProgressScreen extends StatelessWidget {
                                             IconButton(
                                               icon: const Icon(Icons.calendar_today, size: 48),
                                               onPressed: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(builder: (context) => const CalendarScreen()),
+                                                );
                                               },
                                             ),
                                             IconButton(
