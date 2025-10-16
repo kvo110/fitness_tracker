@@ -103,6 +103,31 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   style: TextStyle(color: Colors.white, fontSize: 16),
                 ),
               ),
+
+              // Remove check in button
+              ElevatedButton(
+                onPressed: () {
+                  if (_selectedDay == null) return;
+                  setState(() {
+                    _checkedInDays.removeWhere(
+                        (d) => isSameDay(d, _selectedDay));
+                    _selectedDay = null;
+                  });
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Check in removed')),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                ),
+                child: const Text(
+                  'Remove Check In',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+              ),
             ],
           ),
         ),
