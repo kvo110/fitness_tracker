@@ -164,6 +164,10 @@ class ProgressScreen extends StatelessWidget {
                                             IconButton(
                                               icon: const Icon(Icons.show_chart, size: 48),
                                               onPressed: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(builder: (context) => const TrendsScreen()),
+                                                );
                                               },
                                             ),
                                           ],
