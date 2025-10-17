@@ -1,10 +1,15 @@
+// Mock API for attempt in fetching from a live server 
+// For now, there will be basic workouts that will be listed on the dropdown menu while the API fetch is still in development
+
 class WorkoutAPI {
 
+  // Simulates a network request to fetch workout plans
+  // Currently will only return a static list
   static Future<List<Map<String, String>>> fetchWorkoutPlans() async {
     await Future.delayed(const Duration(milliseconds: 200));
     return _fallbackExercises;
   }
-
+  // Temporary list of workouts
   static final List<Map<String, String>> _fallbackExercises = [
     {
       'name': 'Push-Up',
