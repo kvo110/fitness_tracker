@@ -70,7 +70,7 @@ class _FitnessAppState extends State<FitnessApp> {
         // onOpenCalories: () => setState(() => _index = 2),
       ),
       const WorkoutScreen(),
-      // const CalorieScreen(),
+      const CalorieScreen(),
       const ProgressScreen(),
       SettingsScreen(
         isDark: _isDark,
@@ -95,7 +95,7 @@ class _FitnessAppState extends State<FitnessApp> {
           items: const [
             NavItem(icon: Icons.home, label: 'Home'),
             NavItem(icon: Icons.fitness_center, label: 'Workout'),
-            // NavItem(icon: Icons.local_dining, label: 'Calories'),
+            NavItem(icon: Icons.local_dining, label: 'Calories'),
             NavItem(icon: Icons.bar_chart, label: 'Progress'),
             NavItem(icon: Icons.settings, label: 'Settings'),
           ],
