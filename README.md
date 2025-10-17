@@ -19,3 +19,6 @@ AI use log; (ChatGPT)
         - Can you help me determine why my Theme Mode toggle is not working based on my code for the home_screen and settings_screen?
 
 
+- Friday Oct 17;
+    - Can you help me implement a date and time widget from the flutter library?
+    
