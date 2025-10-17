@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../api/workout_api.dart';
+import '../database/database_helper.dart';
 
 // Workout screen allows users to temporarily log workouts (no DB yet)
 class WorkoutScreen extends StatefulWidget {
@@ -9,7 +10,7 @@ class WorkoutScreen extends StatefulWidget {
     State<WorkoutScreen> createState() => _WorkoutScreenState();
 }
 
-class _WorkoutScreenState extends State<WorkoutScreen> {
+class _WorkoutScreenState extends State<WorkoutScreen> { 
     // Temporary in-memory list of workouts
     final List<Map<String, dynamic>> _workouts = [];
 
@@ -25,6 +26,8 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     String? _selectedRPE;
     // Select workout plan
     String? _selectedPlan;
+    // Select a timestamp
+    DateTime? _selectedDateTime; 
 
     @override
     void initState() {
@@ -46,32 +49,64 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                 debugPrint('${p['name']}');
             }
         } catch (e) {
-            debugPrint('Workout Plan Loadding Error: $e');
+            debugPrint('Workout Plan Loading Error: $e');
         } 
     }
 
+    // Pick time and date 
+    Future <void> _pickDateTime() async {
+        final DateTime? pickedDate = await showDatePicker(
+            context: context,
+            initialDate: DateTime.now(),
+            firstDate: DateTime(2000),
+            lastDate: DateTime(2100),
+        );
+        if (pickedDate != null) {
+            final TimeOfDay? pickedTime = await showTimePicker(
+                context: context,
+                initialTime: TimeOfDay.now(),
+            );
+            if (pickedTime != null) {
+                setState(() {
+                    _selectedDateTime = DateTime(
+                        pickedDate.year,
+                        pickedDate.month,
+                        pickedDate.day,
+                        pickedTime.hour,
+                        pickedTime.minute,
+                    );
+                });
+            }
+        }
+    }
+
     // Add workout to list
-    void _addWorkout() {
+    Future<void> _addWorkout() async {
         if (_exerciseController.text.isEmpty ||
             _setsController.text.isEmpty ||
             _repsController.text.isEmpty) return;
 
-        setState(() {
-        _workouts.add({
+        final workoutData = {
             'exercise': _exerciseController.text,
-            'sets': _setsController.text,
-            'reps': _repsController.text,
-            'duration': _durationController.text,
+            'sets': int.parse(_setsController.text),
+            'reps': int.parse(_repsController.text),
+            'duration': int.parse(_durationController.text),
             'rpe': _selectedRPE ?? 'N/A',
-        });
-    });
+            'date_time': _selectedDateTime?.toIso8601String() ?? DateTime.now().toIso8601String(),
+        };
 
-        // Clear input fields
-        _exerciseController.clear();
-        _setsController.clear();
-        _repsController.clear();
-        _durationController.clear();
-        _selectedRPE = null;
+        // Save entry into the database
+        await DatabaseHelper.instance.insertWorkout(workoutData);
+
+        setState(() {
+            _workouts.add(workoutData);
+            _exerciseController.clear();
+            _setsController.clear();
+            _repsController.clear();
+            _durationController.clear();
+            _selectedRPE = null;
+            _selectedDateTime = null; 
+        });
     }
 
     // Delete workout from list
@@ -205,6 +240,21 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                                                 _selectedRPE = value;
                                             });
                                         },
+                                    ),
+
+                                    // UI to select timestamp
+                                    const SizedBox(height: 12),
+                                    Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                            Text(
+                                                _selectedDateTime == null ? 'No Date Selected' : 'Date: ${_selectedDateTime.toString()}',
+                                            ),
+                                            ElevatedButton(
+                                                onPressed: _pickDateTime,
+                                                child: const Text('Pick Date/Time'),
+                                            ),
+                                        ],
                                     ),
 
                                     const SizedBox(height: 12),
