@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../api/workout_api.dart';
 import '../database/database_helper.dart';
+import '../utils/date_time_formatter.dart';
 
 // Workout screen allows users to temporarily log workouts (no DB yet)
 class WorkoutScreen extends StatefulWidget {
@@ -226,7 +227,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                                     DropdownButtonFormField<String> (
                                         value: _selectedRPE,
                                         decoration: const InputDecoration(
-                                            labelText: 'Intesity (RPE)',
+                                            labelText: 'Intensity (RPE)',
                                             prefixIcon: Icon(Icons.bolt),
                                         ),
                                         items: List.generate(
@@ -315,7 +316,12 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                                                 elevation: 3,
                                                 child: ListTile(
                                                     title: Text(w['exercise']),
-                                                    subtitle: Text('${w['sets']} sets × ${w['reps']} reps\nDuration: ${w['duration']} min\nRPE: ${w['rpe']}'),
+                                                    subtitle: Text(
+                                                        '${w['sets']} sets × ${w['reps']} reps\n'
+                                                        'Duration: ${w['duration']} min\n'
+                                                        'RPE: ${w['rpe']}\n'
+                                                        'Time: ${DateTimeFormatter.format(DateTime.parse(w['date_time']))}',
+                                                    ),
                                                     trailing: IconButton(
                                                         icon: const Icon(Icons.delete_outline),
                                                         onPressed: () => _deleteWorkout(index),
