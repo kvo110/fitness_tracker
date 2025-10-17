@@ -97,20 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
 
                 const SizedBox(height: 20),
-                // Quick action buttons
-                Row(
-                    children: [
-                        Expanded(
-                            child: ElevatedButton.icon(
-                                onPressed: widget.onOpenWorkout,
-                                icon: const Icon(Icons.fitness_center),
-                                label: const Text('Workout Log'),
-                            ),
-                        ),
-                        const SizedBox(width: 12),
-                    ],
-                ),
-                const SizedBox(height: 24),
+
                 // Daily Calorie Check-In box
                 Container(
                     padding: const EdgeInsets.all(16),
