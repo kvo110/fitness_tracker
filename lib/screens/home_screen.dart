@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '.../database/database_helper.dart';
+import '...utils,date_time_formatter.dart';
 
 // Home dashboard screen
 class HomeScreen extends StatefulWidget {
@@ -20,10 +22,18 @@ class _HomeScreenState extends State<HomeScreen> {
     int? _lastCheckIn; // Stores today's calorie check-in temporarily
 
     // Handles calorie check-in logic
-    void _handleCheckIn() {
+    void _handleCheckIn() async {
         if (_calorieController.text.isEmpty) return;
+
         final calories = int.tryParse(_calorieController.text);
         if (calories == null) return;
+
+        final entry = {
+            'calories': calories,
+            'date_time': DateTime.now().toIso8601String(),
+        };
+
+        await DatabaseHelper.instance.insertCalories(entry);
 
         setState(() {
             _lastCheckIn = calories;
@@ -31,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-                content: Text('Check-in saved: $_lastCheckIn calories 🍽️'),
+                content: Text('Check-In Saved: $_lastCheckIn calories'),
                 behavior: SnackBarBehavior.floating,
                 duration: const Duration(seconds: 2),
             ),
