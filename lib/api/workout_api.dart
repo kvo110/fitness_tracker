@@ -1,12 +1,10 @@
 class WorkoutAPI {
-  // This function mimics the previous async structure for easy reuse
+
   static Future<List<Map<String, String>>> fetchWorkoutPlans() async {
-    // Simulate a tiny delay (so your UI doesn’t break expecting a Future)
     await Future.delayed(const Duration(milliseconds: 200));
     return _fallbackExercises;
   }
 
-  // Local list of workout plans
   static final List<Map<String, String>> _fallbackExercises = [
     {
       'name': 'Push-Up',

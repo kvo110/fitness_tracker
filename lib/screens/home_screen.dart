@@ -91,32 +91,32 @@ class _HomeScreenState extends State<HomeScreen> {
                 Center(
                     child: Image.asset(
                     'assets/images/homescreen.png',
-                    height: 140,
+                    height: 200,
                     fit: BoxFit.contain,
                     ),
                 ),
 
                 const SizedBox(height: 20),
                 // Quick action buttons
-                Row(
-                    children: [
-                        Expanded(
-                            child: ElevatedButton.icon(
-                                onPressed: widget.onOpenWorkout,
-                                icon: const Icon(Icons.fitness_center),
-                                label: const Text('Workout Log'),
-                            ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                            child: OutlinedButton.icon(
-                                onPressed: widget.onOpenCalories,
-                                icon: const Icon(Icons.local_dining),
-                                label: const Text('Calorie Tracker'),
-                            ),
-                        ),
-                    ],
-                ),
+                // Row(
+                //     children: [
+                //         Expanded(
+                //             child: ElevatedButton.icon(
+                //                 onPressed: widget.onOpenWorkout,
+                //                 icon: const Icon(Icons.fitness_center),
+                //                 label: const Text('Workout Log'),
+                //             ),
+                //         ),
+                //         const SizedBox(width: 12),
+                //         Expanded(
+                //             child: OutlinedButton.icon(
+                //                 onPressed: widget.onOpenCalories,
+                //                 icon: const Icon(Icons.local_dining),
+                //                 label: const Text('Calorie Tracker'),
+                //             ),
+                //         ),
+                //     ],
+                // ),
                 const SizedBox(height: 24),
                 // Daily Calorie Check-In box
                 Container(
