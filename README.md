@@ -19,7 +19,3 @@ AI use log; (ChatGPT)
         - Can you help me determine why my Theme Mode toggle is not working based on my code for the home_screen and settings_screen?
 
 
-- Thursday Oct 16;
-    - How do create a helper to delete the HTML tags from the API text.
-    - After running this code on the emulator, there is an error with the API getting the workout names. Can you help me determine why its not properly fetching from the API?
-    
