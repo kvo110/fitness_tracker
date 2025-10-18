@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 // importing the screens files
 import 'screens/home_screen.dart';
 import 'screens/workout_logs_screen.dart';
+import 'screens/workout_plans_screen.dart';
 import 'screens/progress_screen.dart';
+import 'screens/calorie_screen.dart';
 import 'screens/settings_screen.dart';
 
 // import widgets
@@ -69,7 +71,8 @@ class _FitnessAppState extends State<FitnessApp> {
         // onOpenCalories: () => setState(() => _index = 2),
       ),
       const WorkoutLogsScreen(),
-      // const CalorieScreen(),
+      const WorkoutPlansScreen(),
+      const CalorieScreen(),
       const ProgressScreen(),
       SettingsScreen(
         isDark: _isDark,
@@ -93,8 +96,9 @@ class _FitnessAppState extends State<FitnessApp> {
           onTap: (i) => setState(() => _index = i),
           items: const [
             NavItem(icon: Icons.home, label: 'Home'),
-            NavItem(icon: Icons.fitness_center, label: 'Workout'),
-            // NavItem(icon: Icons.local_dining, label: 'Calories'),
+            NavItem(icon: Icons.fitness_center, label: 'Workout Logs'),
+            NavItem(icon: Icons.play_lesson, label: 'Workout Plans'),
+            NavItem(icon: Icons.local_dining, label: 'Calories'),
             NavItem(icon: Icons.bar_chart, label: 'Progress'),
             NavItem(icon: Icons.settings, label: 'Settings'),
           ],
