@@ -68,7 +68,7 @@ class _FitnessAppState extends State<FitnessApp> {
         onOpenWorkout: () => setState(() => _index = 1),
         // onOpenCalories: () => setState(() => _index = 2),
       ),
-      const WorkoutScreen(),
+      const WorkoutLogsScreen(),
       // const CalorieScreen(),
       const ProgressScreen(),
       SettingsScreen(
