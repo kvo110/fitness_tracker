@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'calorie_screen.dart';
+import 'calorie_chart_screen.dart';
 import 'calendar_screen.dart';
 import 'trends_screen.dart';
 
@@ -148,7 +148,7 @@ class ProgressScreen extends StatelessWidget {
                                               onPressed: () {
                                                 Navigator.push(
                                                   context,
-                                                  MaterialPageRoute(builder: (context) => const CalorieScreen()),
+                                                  MaterialPageRoute(builder: (context) => const CalorieChartScreen()),
                                                 );
                                               },
                                             ),
