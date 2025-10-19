@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'calorie_chart_screen.dart';
+import 'calendar_screen.dart';
+import 'trends_screen.dart';
 
 // Static progress chart placeholder for Milestone 1
 class ProgressScreen extends StatelessWidget {
-    const ProgressScreen({super.key});
+    const ProgressScreen({super.key, this.onOpenCalories,});
+    final VoidCallback? onOpenCalories;
 
     @override
     Widget build(BuildContext context) {
@@ -21,8 +25,7 @@ class ProgressScreen extends StatelessWidget {
                 backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                 body: Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                    child: ListView(
                         children: [
                             Text(
                                 'Weekly Workout Progress',
@@ -134,7 +137,42 @@ class ProgressScreen extends StatelessWidget {
                                             'Summary Overview',
                                             style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: textColor),
                                         ),
+
                                         const SizedBox(height: 8),
+
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            IconButton(
+                                              icon: const Icon(Icons.local_dining, size: 48),
+                                              onPressed: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(builder: (context) => const CalorieChartScreen()),
+                                                );
+                                              },
+                                            ),
+                                            IconButton(
+                                              icon: const Icon(Icons.calendar_today, size: 48),
+                                              onPressed: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(builder: (context) => const CalendarScreen()),
+                                                );
+                                              },
+                                            ),
+                                            IconButton(
+                                              icon: const Icon(Icons.show_chart, size: 48),
+                                              onPressed: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(builder: (context) => const TrendsScreen()),
+                                                );
+                                              },
+                                            ),
+                                          ],
+                                        ),
+
                                         Text(
                                             'Stay Disciplined\nPay the price now to enjoy the prize later',
                                             textAlign: TextAlign.center,

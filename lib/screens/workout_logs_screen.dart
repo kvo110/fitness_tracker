@@ -4,14 +4,14 @@ import '../database/database_helper.dart';
 import '../utils/date_time_formatter.dart';
 
 // Workout screen allows users to temporarily log workouts (no DB yet)
-class WorkoutScreen extends StatefulWidget {
-    const WorkoutScreen({super.key});
+class WorkoutLogsScreen extends StatefulWidget {
+    const WorkoutLogsScreen({super.key});
 
     @override
-    State<WorkoutScreen> createState() => _WorkoutScreenState();
+    State<WorkoutLogsScreen> createState() => _WorkoutLogsScreenState();
 }
 
-class _WorkoutScreenState extends State<WorkoutScreen> { 
+class _WorkoutLogsScreenState extends State<WorkoutLogsScreen> {
     // Temporary in-memory list of workouts
     final List<Map<String, dynamic>> _workouts = [];
 
