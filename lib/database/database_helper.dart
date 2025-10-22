@@ -120,6 +120,19 @@ class DatabaseHelper {
     return await db.query(workoutsTable, orderBy: 'date_time DESC');
   }
 
+  // NEW FUNCTION: Retrieves workout count grouped by date
+  Future<List<Map<String, dynamic>>> getWorkoutCountsByDay() async {
+    final db = await database;
+    // Group workouts by date (ignores time stamp)
+    return await db.rawQuery('''
+      SELECT
+        Date(date_time) as day,
+        COUNT(*) as count
+      FROM $workoutTable
+      GROUP BY DATE(date_time)
+      ORDER BY day ASC
+    ''')
+  }
 
   // Functions for calories
   // INSERT FUNCTION: Inserts a new calories entry into the database
@@ -178,3 +191,5 @@ class DatabaseHelper {
     return await db.delete(planWorkoutsTable, where: 'id = ?', whereArgs: [workoutId]);
   }
 }
+
+
