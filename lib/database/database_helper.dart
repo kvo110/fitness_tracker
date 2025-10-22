@@ -6,81 +6,175 @@ import 'dart:io';
 
 // Handles the database operations; creating tables, inserting new entries, retrieving data
 class DatabaseHelper {
-    static final DatabaseHelper instance = DatabaseHelper._internal();
-    DatabaseHelper._internal();
+  static final DatabaseHelper instance = DatabaseHelper._internal();
+  DatabaseHelper._internal();
 
-    static Database? _database;
+  static Database? _database;
 
-    // Table name
-    final String workoutsTable = 'workouts';
-    final String caloriesTable = 'calories';
+  // Table names
+  final String workoutsTable = 'workouts';
+  final String caloriesTable = 'calories';
+  final String plansTable = 'plans';
+  final String planWorkoutsTable = 'plan_workouts';
 
-    // Initialize and open database
-    Future<Database> get database async {
-        if (_database != null) return _database!;
-        _database = await _initDatabase();
-        return _database!;
+  // Initialize and open database
+  Future<Database> get database async {
+    if (_database != null) return _database!;
+    _database = await _initDatabase();
+    return _database!;
+  }
+
+  // Sets up the database path and opens/creates the file
+  Future<Database> _initDatabase() async {
+    Directory documentsDirectory = await getApplicationDocumentsDirectory();
+    String path = join(documentsDirectory.path, 'fitness_app.db');
+
+    return await openDatabase(
+      path,
+      version: 2,
+      onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
+    );
+  }
+
+  // Called only when a new database is created for the first time to define the tables
+  Future<void> _onCreate(Database db, int version) async {
+    // Workout table stores individual workout entries
+    await db.execute(''' 
+      CREATE TABLE $workoutsTable (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        exercise TEXT NOT NULL,
+        sets INTEGER NOT NULL,
+        reps INTEGER NOT NULL,
+        duration INTEGER NOT NULL,
+        rpe TEXT,
+        date_time TEXT NOT NULL
+      )
+    ''');
+
+    // Calories table that stores the calorie check ins
+    await db.execute(''' 
+      CREATE TABLE $caloriesTable (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        calories INTEGER NOT NULL,
+        date_time TEXT NOT NULL
+      )
+    ''');
+
+    // Workout Plans table
+    await db.execute(''' 
+      CREATE TABLE $plansTable (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        description TEXT
+      )
+    ''');
+
+    // Selected Plan Workouts table
+    await db.execute(''' 
+      CREATE TABLE $planWorkoutsTable (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        plan_id INTEGER NOT NULL,
+        workout_name TEXT NOT NULL,
+        sets INTEGER NOT NULL,
+        reps INTEGER NOT NULL,
+        FOREIGN KEY(plan_id) REFERENCES $plansTable(id) ON DELETE CASCADE
+      )
+    ''');
+  }
+
+  // Upgrades the database to add in new tables
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute(''' 
+        CREATE TABLE IF NOT EXISTS $plansTable (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title TEXT NOT NULL,
+          description TEXT
+        )
+      ''');
+
+      await db.execute(''' 
+        CREATE TABLE IF NOT EXISTS $planWorkoutsTable (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          plan_id INTEGER NOT NULL,
+          workout_name TEXT NOT NULL,
+          sets INTEGER NOT NULL,
+          reps INTEGER NOT NULL,
+          FOREIGN KEY(plan_id) REFERENCES $plansTable(id) ON DELETE CASCADE
+        )
+      ''');
     }
+  }
 
-    // Sets up the database path and opens/creates the file
-    Future<Database> _initDatabase() async {
-        Directory documentsDirectory = await getApplicationDocumentsDirectory();
-        String path = join(documentsDirectory.path, 'fitness_app.db');
-        
-        return await openDatabase(
-            path,
-            version: 1,
-            onCreate: _onCreate,
-        );
-    }
+  // Functions for workouts
+  // INSERT FUNCTION: Inserts a new workout entry into the database
+  Future<int> insertWorkout(Map<String, dynamic> workoutData) async {
+    final db = await database;
+    return await db.insert(workoutsTable, workoutData);
+  }
 
-    // Called only when a new database is created for the first time to define the tables
-    Future<void> _onCreate(Database db, int version) async {
-        // Workout table stores individual workout entries
-        await db.execute(''' 
-            CREATE TABLE $workoutsTable (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                exercise TEXT NOT NULL,
-                sets INTEGER NOT NULL,
-                reps INTEGER NOT NULL,
-                duration INTEGER NOT NULL,
-                rpe TEXT,
-                date_time TEXT NOT NULL
-            )
-        ''');
-
-        // Calories table that stores the calorie check ins
-        await db.execute(''' 
-            CREATE TABLE $caloriesTable (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                calories INTEGER NOT NULL,
-                date_time TEXT NOT NULL
-            )
-        ''');
-    }
+  // RETRIEVE FUNCTION: Retrieves all the workout entries from the database
+  Future<List<Map<String, dynamic>>> getAllWorkouts() async {
+    final db = await database;
+    return await db.query(workoutsTable, orderBy: 'date_time DESC');
+  }
 
 
-    // INSERT FUNCTION: Inserts a new workout entry into the database
-    Future<int>  insertWorkout(Map<String, dynamic> workoutData) async {
-        final db = await database;
-        return await db.insert(workoutsTable, workoutData);
-    }
+  // Functions for calories
+  // INSERT FUNCTION: Inserts a new calories entry into the database
+  Future<int> insertCalories(Map<String, dynamic> calorieData) async {
+    final db = await database;
+    return await db.insert(caloriesTable, calorieData);
+  }
 
-    // INSERT FUNCTION: Inserts a new calories entry into the database
-    Future<int> insertCalories(Map<String, dynamic> calorieData) async {
-        final db = await database;
-        return await db.insert(caloriesTable, calorieData);
-    }
+  // RETRIEVE FUNCTION: Retrieves all the calorie entries from the database
+  Future<List<Map<String, dynamic>>> getAllCalories() async {
+    final db = await database;
+    return await db.query(caloriesTable, orderBy: 'date_time DESC');
+  }
 
-    // RETRIEVE FUNCTION: Retrieves all the workout entries from the database
-    Future<List<Map<String, dynamic>>> getAllWorkouts() async {
-        final db = await database;
-        return await db.query(workoutsTable, orderBy: 'date_time DESC');
-    }
 
-    // RETRIEVE FUNCTION: Retrieves all the calorie entries from the database
-    Future<List<Map<String, dynamic>>> getAllCalories() async {
-        final db = await database;
-        return await db.query(caloriesTable, orderBy: 'date_time DESC');
-    }
+  // Functions for workout plans/selected workout
+  // INSERT FUNCTION: Adds a new workout plan
+  Future<int> insertPlan(Map<String, dynamic> planData) async {
+    final db = await database;
+    return await db.insert(plansTable, planData);
+  }
+
+  // RETRIEVE FUNCTION: Gets all workout plans
+  Future<List<Map<String, dynamic>>> getAllPlans() async {
+    final db = await database;
+    return await db.query(plansTable, orderBy: 'id DESC');
+  }
+
+  // DELETE FUNCTION: Removes a workout plan and its workouts
+  Future<int> deletePlan(int planId) async {
+    final db = await database;
+    await db.delete(planWorkoutsTable, where: 'plan_id = ?', whereArgs: [planId]);
+    return await db.delete(plansTable, where: 'id = ?', whereArgs: [planId]);
+  }
+
+  // INSERT FUNCTION: Adds a workout to a plan
+  Future<int> insertWorkoutToPlan(Map<String, dynamic> data) async {
+    final db = await database;
+    return await db.insert(planWorkoutsTable, data);
+  }
+
+  // RETRIEVE FUNCTION: Gets all workouts to a specific plan
+  Future<List<Map<String, dynamic>>> getWorkoutsForPlan(int planId) async {
+    final db = await database;
+    return await db.query(
+      planWorkoutsTable,
+      where: 'plan_id = ?',
+      whereArgs: [planId],
+      orderBy: 'id DESC',
+    );
+  }
+
+  // DELETE FUNCTION: Removes a workout from a plan
+  Future<int> deleteWorkoutFromPlan(int workoutId) async {
+    final db = await database;
+    return await db.delete(planWorkoutsTable, where: 'id = ?', whereArgs: [workoutId]);
+  }
 }

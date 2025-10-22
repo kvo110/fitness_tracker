@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../database/database_helper.dart';
+import 'selected_workout_screen.dart';
 
 class WorkoutPlansScreen extends StatefulWidget {
   const WorkoutPlansScreen({super.key});
@@ -8,7 +10,28 @@ class WorkoutPlansScreen extends StatefulWidget {
 }
 
 class _WorkoutPlansScreenState extends State<WorkoutPlansScreen> {
-  final List<Map<String, String>> _workoutPlans = [];
+  final dbHelper = DatabaseHelper.instance;
+  List<Map<String, dynamic>> _workoutPlans = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPlans();
+  }
+
+  // Loads all workout plans
+  Future<void> _loadPlans() async {
+    final plans = await dbHelper.getAllPlans();
+    setState(() {
+      _workoutPlans = plans;
+    });
+  }
+  
+  // Deletes a workout plan
+  Future<void> _deletePlan(int planId) async {
+    await dbHelper.deletePlan(planId);
+    await _loadPlans();
+  }
 
   void _showAddWorkoutDialog() {
     final titleController = TextEditingController();
@@ -55,16 +78,16 @@ class _WorkoutPlansScreenState extends State<WorkoutPlansScreen> {
             ),
 
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 final title = titleController.text.trim();
                 final desc = descController.text.trim();
+
                 if (title.isNotEmpty) {
-                  setState(() {
-                    _workoutPlans.add({
-                      'title': title,
-                      'description': desc,
-                    });
+                  await dbHelper.insertPlan({
+                    'title': title,
+                    'description': desc,
                   });
+                  await _loadPlans();
                   Navigator.pop(context);
                 }
               },
@@ -81,7 +104,7 @@ class _WorkoutPlansScreenState extends State<WorkoutPlansScreen> {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Workout Plan'),
+          title: const Text('Workout Plans'),
           centerTitle: true,
           actions: [
             IconButton(
@@ -93,40 +116,52 @@ class _WorkoutPlansScreenState extends State<WorkoutPlansScreen> {
 
         // Displays workout plans or a message if empty
         body: _workoutPlans.isEmpty
-          ? const Center(
-              child: Text(
-                'No workout plans. \n Tap + to add one or choose a guide!',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey, fontSize: 16),
-              ),
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.all(12),
-              itemCount: _workoutPlans.length,
-              itemBuilder: (context, index) {
-                final plan = _workoutPlans[index];
-                return Card(
-                  margin: const EdgeInsets.symmetric(vertical: 8),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 3,
-                  child: ListTile(
-                    title: Text(
-                      plan['title'] ?? '',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
+            ? const Center(
+                child: Text(
+                  'No workout plans. \nTap + to add one!',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.grey, fontSize: 16),
+                ),
+              )
+            : ListView.builder(
+                padding: const EdgeInsets.all(12),
+                itemCount: _workoutPlans.length,
+                itemBuilder: (context, index) {
+                  final plan = _workoutPlans[index];
+                  return Card(
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 3,
+                    child: ListTile(
+                      title: Text(
+                        plan['title'] ?? '',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
                       ),
+                      subtitle: Text(plan['description'] ?? ''),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () => _deletePlan(plan['id']),
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => SelectedWorkoutScreen(
+                              planId: plan['id'],
+                              planTitle: plan['title'],
+                            ),
+                          ),
+                        );
+                      },
                     ),
-                    subtitle: Text(
-                      plan['description'] ?? '',
-                      style: const TextStyle(fontSize: 15),
-                    ),
-                  ),
-                );
-              },
-            ),
+                  );
+                },
+              ),
       ),
     );
   }
