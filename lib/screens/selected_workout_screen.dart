@@ -19,6 +19,20 @@ class _SelectedWorkoutScreenState extends State<SelectedWorkoutScreen> {
   final dbHelper = DatabaseHelper.instance;
   List<Map<String, dynamic>> _workouts = [];
 
+  // RPE description for user to understand what each RPE means
+  static const List<String> _rpeDescriptions = [
+    'Very Easy',
+    'Easy',
+    'Moderate',
+    'Somewhat Hard',
+    'Hard',
+    'Challenging',
+    'Very Challenging',
+    'Intense',
+    'Highly Intense',
+    'Max Effort',
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -43,6 +57,7 @@ class _SelectedWorkoutScreenState extends State<SelectedWorkoutScreen> {
     final nameController = TextEditingController();
     final setsController = TextEditingController();
     final repsController = TextEditingController();
+    String? selectedRPE;
 
     // Creates pop up to add new workout
     showDialog(
@@ -50,41 +65,66 @@ class _SelectedWorkoutScreenState extends State<SelectedWorkoutScreen> {
       builder: (context) {
         return AlertDialog(
           title: const Text('Add Workout'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
               // Workout name input
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Workout Name',
-                  border: OutlineInputBorder(),
+                TextField(
+                  controller: nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Workout Name',
+                    border: OutlineInputBorder(),
+                  ),
                 ),
-              ),
 
-              const SizedBox(height: 10),
+                const SizedBox(height: 10),
 
               // Sets input
-              TextField(
-                controller: setsController,
-                decoration: const InputDecoration(
-                  labelText: 'Sets',
-                  border: OutlineInputBorder(),
+                TextField(
+                  controller: setsController,
+                  decoration: const InputDecoration(
+                    labelText: 'Sets',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
                 ),
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 10),
+
+                const SizedBox(height: 10),
 
               // Reps input
-              TextField(
-                controller: repsController,
-                decoration: const InputDecoration(
-                  labelText: 'Reps',
-                  border: OutlineInputBorder(),
+                TextField(
+                  controller: repsController,
+                  decoration: const InputDecoration(
+                    labelText: 'Reps',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
                 ),
-                keyboardType: TextInputType.number,
-              ),
-            ],
+
+                const SizedBox(height: 10),
+
+                // RPE dropdown
+                DropdownButtonFormField<String>(
+                  initialValue: selectedRPE,
+                  decoration: const InputDecoration(
+                    labelText: 'Intensity (RPE)',
+                    prefixIcon: Icon(Icons.bolt),
+                    border: OutlineInputBorder(),
+                  ),
+                  items: List.generate(
+                    10,
+                    (i) => DropdownMenuItem(
+                      value: '${i + 1}',
+                      child: Text('RPE ${i + 1} - ${_rpeDescriptions[i]}'),
+                    ),
+                  ),
+                  onChanged: (value) {
+                    selectedRPE = value;
+                  },
+                ),
+              ],
+            ),
           ),
           actions: [
             // Cancel and Add buttons
@@ -106,6 +146,7 @@ class _SelectedWorkoutScreenState extends State<SelectedWorkoutScreen> {
                     'workout_name': name,
                     'sets': int.parse(sets),
                     'reps': int.parse(reps),
+                    'rpe': selectedRPE ?? 'N/A',
                   });
                   await _loadWorkouts();
                   Navigator.pop(context);
@@ -147,40 +188,41 @@ class _SelectedWorkoutScreenState extends State<SelectedWorkoutScreen> {
 
           // Otherwise, show list of workouts
           : ListView.builder(
-            padding: const EdgeInsets.all(12),
-            itemCount: _workouts.length,
-            itemBuilder: (context, index) {
-              final workout = _workouts[index];
-              return Card(
-                margin: const EdgeInsets.symmetric(vertical: 8),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 3,
-                child: ListTile(
-                  title: Text(
-                    workout['workout_name'] ?? '',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
+              padding: const EdgeInsets.all(12),
+              itemCount: _workouts.length,
+              itemBuilder: (context, index) {
+                final workout = _workouts[index];
+                return Card(
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 3,
+                  child: ListTile(
+                    title: Text(
+                      workout['workout_name'] ?? '',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+
+                    subtitle: Text(
+                      '${workout['sets']} sets × ${workout['reps']} reps\n'
+                      'RPE: ${workout['rpe'] ?? 'N/A'}',
+                      style: const TextStyle(fontSize: 15),
+                    ),
+
+                    // Delete workout button
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: () =>
+                          _deleteWorkout(workout['id'] as int),
                     ),
                   ),
-
-                  subtitle: Text(
-                    '${workout['sets']} sets × ${workout['reps']} reps',
-                    style: const TextStyle(fontSize: 15),
-                  ),
-
-                  // Delete workout button
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.red),
-                    onPressed: () =>
-                        _deleteWorkout(workout['id'] as int),
-                  ),
-                ),
-              );
-            },
-          ),
+                );
+              },
+            ),
       ),
     );
   }
