@@ -19,11 +19,16 @@ AI use log; (ChatGPT)
         - Can you help me determine why my Theme Mode toggle is not working based on my code for the home_screen and settings_screen?
 
 - Thursday Oct 16;
-    - Asked "how can I add an interactable calendar in flutter", "how can I mark certain parts of the calendar", and a lot of debugging on setting up and           marking
+    - Asked "how can I add an interactable calendar in flutter", "how can I mark certain parts of the calendar", and a lot of debugging on setting up and marking
     - Showed the dependency for creating calendars and examples
     - Showed how to set up icons for marking and customization options
     - Used the dependency to create my own calendar and allow the users to check in to mark days
 
 - Friday Oct 17;
     - Can you help me implement a date and time widget from the flutter library?
+
+- Wednesday Oct 22;
+    - Asked "why are my new added tables not working properly"
+    - Explained about upgrading the database to a new version to properly add new tables
+    - Used this to add in new tables and upgrade the database
     
