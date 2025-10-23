@@ -230,5 +230,41 @@ class DatabaseHelper {
     final db = await database;
     return await db.delete(planWorkoutsTable, where: 'id = ?', whereArgs: [workoutId]);
   }
+
+  // Clears only the workouts table. Used when the user wants a fresh start 
+  // without losing calorie or plan data.
+  Future<void> clearAllWorkouts() async {
+    final db = await database;
+    await db.delete(workoutsTable);
+    // Helps shrink the database file after deletes
+    await db.execute('VACUUM');
+  }
+
+  // Clears only the calories table. Keeps the workout logs intact.
+  Future<void> clearAllCalories() async {
+    final db = await database;
+    await db.delete(caloriesTable);
+    await db.execute('VACUUM');
+  }
+
+  // Clears only the workout plans and associated workouts. This is isolated 
+  // from the main workout history so users can keep their logs if they want.
+  Future<void> clearAllPlans() async {
+    final db = await database;
+    await db.delete(planWorkoutsTable);
+    await db.delete(plansTable);
+    await db.execute('VACUUM');
+  }
+
+  // Full reset: wipes everything in one go. Ideal for a total restart or 
+  // when the user wants a clean slate.
+  Future<void> clearAllData() async {
+    final db = await database;
+    await db.delete(workoutsTable);
+    await db.delete(caloriesTable);
+    await db.delete(planWorkoutsTable);
+    await db.delete(plansTable);
+    await db.execute('VACUUM');
+  }
 }
 

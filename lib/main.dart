@@ -7,12 +7,15 @@ import 'screens/workout_plans_screen.dart';
 import 'screens/calorie_screen.dart';
 import 'screens/insights_screen.dart'; // Updated name to follow the updated label of progress_screen.dart to insights_screen.dart
 import 'screens/settings_screen.dart';
+import 'notifications/notification.dart'; // notification file 
 
 // import widgets
 import 'widgets/nav_bar.dart';
 
 // Entry point of the Fitness App
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService().init();
   runApp(const FitnessApp());
 }
 
