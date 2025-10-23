@@ -1,3 +1,5 @@
+// Professor Henry approved of our guides to be Push, Pull, and Legs rather than beginner, intermediate, and advanced
+
 import 'package:flutter/material.dart';
 import '../database/database_helper.dart';
 import 'selected_workout_screen.dart';
@@ -21,23 +23,97 @@ class _WorkoutPlansScreenState extends State<WorkoutPlansScreen> {
 
   // Loads all workout plans
   Future<void> _loadPlans() async {
-    final plans = await dbHelper.getAllPlans();
-    setState(() {
-      _workoutPlans = plans;
-    });
+    final data = await dbHelper.getAllPlans();
+    setState(() => _workoutPlans = data);
   }
-  
+
   // Deletes a workout plan
   Future<void> _deletePlan(int planId) async {
     await dbHelper.deletePlan(planId);
     await _loadPlans();
   }
 
+  // Creates a predefined workout plan guide
+  Future<void> _createGuide(String guideType) async {
+    int planId;
+
+    if (guideType == 'Push') {
+      planId = await dbHelper.insertPlan({
+        'title': 'Push',
+        'description': 'Chest, Shoulder, Tricep workout',
+      });
+
+      final workouts = [
+        {'workout_name': 'Bench Press', 'sets': 3, 'reps': 5},
+        {'workout_name': 'Barbell Overhead Press', 'sets': 2, 'reps': 8},
+        {'workout_name': 'Skull Crushers', 'sets': 4, 'reps': 10},
+        {'workout_name': 'Lateral Raises', 'sets': 3, 'reps': 10},
+        {'workout_name': 'Incline Chest Press', 'sets': 3, 'reps': 8},
+      ];
+
+      for (var w in workouts) {
+        await dbHelper.insertWorkoutToPlan({
+          'plan_id': planId,
+          'workout_name': w['workout_name'],
+          'sets': w['sets'],
+          'reps': w['reps'],
+        });
+      }
+    } else if (guideType == 'Pull') {
+      planId = await dbHelper.insertPlan({
+        'title': 'Pull',
+        'description': 'Back, Bicep workout',
+      });
+
+      final workouts = [
+        {'workout_name': 'Hyper Back Extension', 'sets': 4, 'reps': 12},
+        {'workout_name': 'Bent Over Barbell Row', 'sets': 3, 'reps': 10},
+        {'workout_name': 'Preacher Curls', 'sets': 3, 'reps': 8},
+        {'workout_name': 'Rear-Delt Flies', 'sets': 3, 'reps': 12},
+        {'workout_name': 'Dumbbell Curls', 'sets': 3, 'reps': 10},
+      ];
+
+      for (var w in workouts) {
+        await dbHelper.insertWorkoutToPlan({
+          'plan_id': planId,
+          'workout_name': w['workout_name'],
+          'sets': w['sets'],
+          'reps': w['reps'],
+        });
+      }
+    } else if (guideType == 'Legs & Core') {
+      planId = await dbHelper.insertPlan({
+        'title': 'Legs & Core',
+        'description': 'Lower body and core workout',
+      });
+
+      final workouts = [
+        {'workout_name': 'Barbell Squats', 'sets': 4, 'reps': 5},
+        {'workout_name': 'Lunges', 'sets': 3, 'reps': 20},
+        {'workout_name': 'Romanian Deadlift', 'sets': 3, 'reps': 8},
+        {'workout_name': 'Leg Extension', 'sets': 3, 'reps': 12},
+        {'workout_name': 'Hamstring Curls', 'sets': 3, 'reps': 10},
+        {'workout_name': 'Weighted Planks', 'sets': 3, 'reps': 0},
+      ];
+
+      for (var w in workouts) {
+        await dbHelper.insertWorkoutToPlan({
+          'plan_id': planId,
+          'workout_name': w['workout_name'],
+          'sets': w['sets'],
+          'reps': w['reps'],
+        });
+      }
+    }
+
+    _loadPlans(); // refresh UI
+  }
+
   void _showAddWorkoutDialog() {
     final titleController = TextEditingController();
     final descController = TextEditingController();
 
-    // Creates pop up to add new plan
+    // Creates pop up to add new custom plan
     showDialog(
       context: context,
       builder: (context) {
@@ -99,6 +175,39 @@ class _WorkoutPlansScreenState extends State<WorkoutPlansScreen> {
     );
   }
 
+  // Creates pop up to choose a workout guide
+  void _showGuideDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Choose a Workout Guide'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildGuideButton('Push'),
+              _buildGuideButton('Pull'),
+              _buildGuideButton('Legs & Core'),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildGuideButton(String guideName) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      child: ElevatedButton(
+        onPressed: () async {
+          Navigator.pop(context);
+          await _createGuide(guideName);
+        },
+        child: Text(guideName),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -107,9 +216,25 @@ class _WorkoutPlansScreenState extends State<WorkoutPlansScreen> {
           title: const Text('Workout Plans'),
           centerTitle: true,
           actions: [
-            IconButton(
+            PopupMenuButton<String>(
               icon: const Icon(Icons.add),
-              onPressed: _showAddWorkoutDialog,
+              onSelected: (value) {
+                if (value == 'manual') {
+                  _showAddWorkoutDialog();
+                } else if (value == 'guide') {
+                  _showGuideDialog();
+                }
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: 'manual',
+                  child: Text('Add Custom Plan'),
+                ),
+                const PopupMenuItem(
+                  value: 'guide',
+                  child: Text('Add Guide Plan'),
+                ),
+              ],
             ),
           ],
         ),
@@ -118,7 +243,7 @@ class _WorkoutPlansScreenState extends State<WorkoutPlansScreen> {
         body: _workoutPlans.isEmpty
             ? const Center(
                 child: Text(
-                  'No workout plans. \nTap + to add one!',
+                  'No workout plans.\nTap + to add one!',
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.grey, fontSize: 16),
                 ),
