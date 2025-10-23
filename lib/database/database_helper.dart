@@ -128,10 +128,50 @@ class DatabaseHelper {
       SELECT
         Date(date_time) as day,
         COUNT(*) as count
-      FROM $workoutTable
+      FROM $workoutsTable
       GROUP BY DATE(date_time)
       ORDER BY day ASC
-    ''')
+    ''');
+  }
+
+  // NEW FUNCTION: Retrieves total workout duration 
+  Future<List<Map<String, dynamic>>> getWorkoutDurationByDay() async {
+    final db = await database;
+    return await db.rawQuery('''
+      SELECT
+        DATE(date_time) as day,
+        SUM(duration) as total_duration
+      FROM $workoutsTable
+      GROUP BY DATE(date_time)
+      ORDER BY day ASC
+    ''');
+  }
+
+  // NEW FUNCTION: Retrieves avg workout RPE grouped
+  Future<List<Map<String, dynamic>>> getAverageRPEByDay() async {
+    final db = await database;
+    return await db.rawQuery('''
+      SELECT
+        DATE(date_time) as day,
+        AVG(CAST(rpe AS INTEGER)) as avg_rpe
+      FROM $workoutsTable
+      WHERE rpe IS NOT NULL AND rpe != 'N/A'
+      GROUP BY DATE(date_time)
+      ORDER BY day ASC
+    ''');
+  }
+
+  // NEW FUNCTION: Retrieves tracked calorie totals 
+  Future<List<Map<String, dynamic>>> getCaloriesByDay() async {
+    final db = await database;
+    return await db.rawQuery('''
+      SELECT
+        DATE(date_time) as day,
+        SUM(calories) as total_calories
+      FROM $caloriesTable
+      GROUP BY DATE(date_time)
+      ORDER BY day ASC
+    ''');
   }
 
   // Functions for calories
@@ -191,5 +231,4 @@ class DatabaseHelper {
     return await db.delete(planWorkoutsTable, where: 'id = ?', whereArgs: [workoutId]);
   }
 }
-
 

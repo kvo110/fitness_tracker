@@ -5,7 +5,7 @@ import 'screens/home_screen.dart';
 import 'screens/workout_logs_screen.dart';
 import 'screens/workout_plans_screen.dart';
 import 'screens/calorie_screen.dart';
-import 'screens/progress_screen.dart';
+import 'screens/insights_screen.dart'; // Updated name to follow the updated label of progress_screen.dart to insights_screen.dart
 import 'screens/settings_screen.dart';
 
 // import widgets
@@ -30,37 +30,47 @@ class _FitnessAppState extends State<FitnessApp> {
 
   @override
   Widget build(BuildContext context) {
-    // Light theme mode
+    // Light theme
     final light = ThemeData(
       brightness: Brightness.light,
       useMaterial3: true,
       scaffoldBackgroundColor: const Color(0xFFF2F2F2),
       colorScheme: const ColorScheme.light(
-        primary: Color(0xFF1E88E5), // Bright blue color
-        secondary: Colors.blueAccent,
+        primary: Color(0xFF1E88E5),
+        secondary: Color(0xFF42A5F5),
+        tertiary: Color(0xFF66BB6A),
+        error: Color(0xFFE53935),
         surface: Colors.white,
         onSurface: Colors.black,
         onPrimary: Colors.white,
         onSecondary: Colors.white,
+        onTertiary: Colors.white,
+        onError: Colors.white,
       ),
-      textTheme: const TextTheme(bodyMedium: TextStyle(color: Colors.black),
+      textTheme: const TextTheme(
+        bodyMedium: TextStyle(color: Colors.black),
       ),
     );
 
-    // Dark theme mode
+    // Dark theme
     final dark = ThemeData(
       brightness: Brightness.dark,
       useMaterial3: true,
       scaffoldBackgroundColor: const Color(0xFF1E1E1E),
       colorScheme: const ColorScheme.dark(
-        primary: Color(0xFF0D47A1), // darker blue
+        primary: Color(0xFF0D47A1),
         secondary: Color(0xFF1565C0),
+        tertiary: Color(0xFF2E7D32),
+        error: Color(0xFFFF5252),
         surface: Color(0xFF2B2B2B),
         onSurface: Colors.white,
         onPrimary: Colors.white,
         onSecondary: Colors.white,
+        onTertiary: Colors.white,
+        onError: Colors.white,
       ),
-      textTheme: const TextTheme(bodyMedium: TextStyle(color: Colors.white),
+      textTheme: const TextTheme(
+        bodyMedium: TextStyle(color: Colors.white),
       ),
     );
 
@@ -68,12 +78,11 @@ class _FitnessAppState extends State<FitnessApp> {
     final List<Widget> tabs = [
       HomeScreen(
         onOpenWorkout: () => setState(() => _index = 1),
-        // onOpenCalories: () => setState(() => _index = 2),
       ),
       const WorkoutLogsScreen(),
       const WorkoutPlansScreen(),
       const CalorieScreen(),
-      const ProgressScreen(),
+      const InsightsScreen(), // Replaced with new Insights screen
       SettingsScreen(
         isDark: _isDark,
         onToggleTheme: (v) => setState(() => _isDark = v),
@@ -85,21 +94,19 @@ class _FitnessAppState extends State<FitnessApp> {
       title: 'Fitness Tracker App',
       theme: light,
       darkTheme: dark,
-      // Switch theme based on toggled option in the settings screen
       themeMode: _isDark ? ThemeMode.dark : ThemeMode.light,
       home: Scaffold(
-        extendBody: true, // Creates the floating effect of the nav bar
+        extendBody: true,
         body: tabs[_index],
-        // Bottom nav bar
         bottomNavigationBar: NavBar(
           currentIndex: _index,
           onTap: (i) => setState(() => _index = i),
           items: const [
             NavItem(icon: Icons.home, label: 'Home'),
             NavItem(icon: Icons.fitness_center, label: 'Workout Logs'),
-            NavItem(icon: Icons.play_lesson, label: 'Workout Plans'),
+            NavItem(icon: Icons.play_lesson, label: 'Plans'),
             NavItem(icon: Icons.local_dining, label: 'Calories'),
-            NavItem(icon: Icons.bar_chart, label: 'Progress'),
+            NavItem(icon: Icons.bar_chart, label: 'Insights'),
             NavItem(icon: Icons.settings, label: 'Settings'),
           ],
         ),
