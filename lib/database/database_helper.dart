@@ -187,7 +187,6 @@ class DatabaseHelper {
     return await db.query(caloriesTable, orderBy: 'date_time DESC');
   }
 
-
   // Functions for workout plans/selected workout
   // INSERT FUNCTION: Adds a new workout plan
   Future<int> insertPlan(Map<String, dynamic> planData) async {
@@ -267,4 +266,3 @@ class DatabaseHelper {
     await db.execute('VACUUM');
   }
 }
-
