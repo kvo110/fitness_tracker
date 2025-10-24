@@ -11,7 +11,8 @@ class WorkoutLogsScreen extends StatefulWidget {
     State<WorkoutLogsScreen> createState() => _WorkoutLogsScreenState();
 }
 
-class _WorkoutLogsScreenState extends State<WorkoutLogsScreen> {
+class _WorkoutLogsScreenState extends State<WorkoutLogsScreen>
+    with AutomaticKeepAliveClientMixin {
     // Backing list populated from the database
     final List<Map<String, dynamic>> _workouts = [];
 
@@ -31,6 +32,10 @@ class _WorkoutLogsScreenState extends State<WorkoutLogsScreen> {
     DateTime? _selectedDateTime;
 
     bool _loading = true;
+
+    // Keep state alive when switching tabs so the list doesn't disappear
+    @override
+    bool get wantKeepAlive => true;
 
     @override
     void initState() {
@@ -158,8 +163,245 @@ class _WorkoutLogsScreenState extends State<WorkoutLogsScreen> {
         await _loadWorkouts();
     }
 
+    // Edit flow: bottom sheet with pre-filled fields, updates DB, refreshes list
+    Future<void> _editWorkout(int index) async {
+        final row = _workouts[index];
+        final int? id = row['id'] as int?;
+        if (id == null) return;
+
+        // Local controllers so we don't clobber the "add" form's inputs
+        final nameCtrl = TextEditingController(text: row['exercise']?.toString() ?? '');
+        final setsCtrl = TextEditingController(text: row['sets']?.toString() ?? '');
+        final repsCtrl = TextEditingController(text: row['reps']?.toString() ?? '');
+        final durationCtrl = TextEditingController(text: row['duration']?.toString() ?? '');
+        String? rpe = (row['rpe']?.toString().isNotEmpty ?? false) ? row['rpe'].toString() : null;
+
+        DateTime initialDate;
+        try {
+            initialDate = DateTime.parse(row['date_time'].toString());
+        } catch (_) {
+            initialDate = DateTime.now();
+        }
+        DateTime editedDateTime = initialDate;
+
+        await showModalBottomSheet<void>(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+            ),
+            builder: (ctx) {
+                final viewInsets = MediaQuery.of(ctx).viewInsets.bottom;
+                final isLight = Theme.of(ctx).brightness == Brightness.light;
+                final cardBg = isLight ? Colors.white : Colors.grey[900];
+
+                return Padding(
+                    padding: EdgeInsets.only(bottom: viewInsets),
+                    child: SingleChildScrollView(
+                        child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                    Text(
+                                        'Edit Workout',
+                                        style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                        ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Container(
+                                        padding: const EdgeInsets.all(16),
+                                        decoration: BoxDecoration(
+                                            color: cardBg,
+                                            borderRadius: BorderRadius.circular(12),
+                                            boxShadow: [
+                                                BoxShadow(
+                                                    color: isLight
+                                                        ? Colors.black.withOpacity(0.08)
+                                                        : Colors.white.withOpacity(0.08),
+                                                    blurRadius: 8,
+                                                    offset: const Offset(0, 4),
+                                                ),
+                                            ],
+                                        ),
+                                        child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                                TextField(
+                                                    controller: nameCtrl,
+                                                    decoration: const InputDecoration(
+                                                        labelText: 'Exercise Name',
+                                                        prefixIcon: Icon(Icons.fitness_center),
+                                                    ),
+                                                ),
+                                                const SizedBox(height: 10),
+                                                Row(
+                                                    children: [
+                                                        Expanded(
+                                                            child: TextField(
+                                                                controller: setsCtrl,
+                                                                keyboardType: TextInputType.number,
+                                                                decoration: const InputDecoration(
+                                                                    labelText: 'Sets',
+                                                                    prefixIcon: Icon(Icons.repeat),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                        const SizedBox(width: 8),
+                                                        Expanded(
+                                                            child: TextField(
+                                                                controller: repsCtrl,
+                                                                keyboardType: TextInputType.number,
+                                                                decoration: const InputDecoration(
+                                                                    labelText: 'Reps',
+                                                                    prefixIcon: Icon(Icons.numbers),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ],
+                                                ),
+                                                const SizedBox(height: 10),
+                                                TextField(
+                                                    controller: durationCtrl,
+                                                    keyboardType: TextInputType.number,
+                                                    decoration: const InputDecoration(
+                                                        labelText: 'Duration (min)',
+                                                        prefixIcon: Icon(Icons.timer),
+                                                    ),
+                                                ),
+                                                const SizedBox(height: 10),
+                                                DropdownButtonFormField<String>(
+                                                    value: rpe,
+                                                    decoration: const InputDecoration(
+                                                        labelText: 'Intensity (RPE)',
+                                                        prefixIcon: Icon(Icons.bolt),
+                                                    ),
+                                                    items: List.generate(
+                                                        10,
+                                                        (i) => DropdownMenuItem(
+                                                            value: '${i + 1}',
+                                                            child: Text('RPE ${i + 1} - ${_rpeDescriptions[i]}'),
+                                                        ),
+                                                    ),
+                                                    onChanged: (v) => rpe = v,
+                                                ),
+                                                const SizedBox(height: 12),
+                                                Row(
+                                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                    children: [
+                                                        Text('Date: ${DateTimeFormatter.format(editedDateTime)}'),
+                                                        TextButton(
+                                                            onPressed: () async {
+                                                                final d = await showDatePicker(
+                                                                    context: ctx,
+                                                                    initialDate: editedDateTime,
+                                                                    firstDate: DateTime(2000),
+                                                                    lastDate: DateTime(2100),
+                                                                );
+                                                                if (d == null) return;
+                                                                final t = await showTimePicker(
+                                                                    context: ctx,
+                                                                    initialTime: TimeOfDay.fromDateTime(editedDateTime),
+                                                                );
+                                                                if (t == null) return;
+                                                                setState(() {
+                                                                    editedDateTime = DateTime(
+                                                                        d.year, d.month, d.day, t.hour, t.minute);
+                                                                });
+                                                            },
+                                                            child: const Text('Pick Date/Time'),
+                                                        ),
+                                                    ],
+                                                ),
+                                            ],
+                                        ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Row(
+                                        children: [
+                                            Expanded(
+                                                child: OutlinedButton(
+                                                    onPressed: () => Navigator.pop(ctx),
+                                                    child: const Text('Cancel'),
+                                                ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                                child: ElevatedButton(
+                                                    onPressed: () async {
+                                                        final setsParsed = int.tryParse(setsCtrl.text);
+                                                        final repsParsed = int.tryParse(repsCtrl.text);
+                                                        final durParsed = int.tryParse(durationCtrl.text);
+
+                                                        if ((nameCtrl.text).trim().isEmpty ||
+                                                            setsParsed == null ||
+                                                            repsParsed == null) {
+                                                            ScaffoldMessenger.of(context).showSnackBar(
+                                                                const SnackBar(
+                                                                    content: Text('Please fill exercise, sets, and reps.'),
+                                                                    behavior: SnackBarBehavior.floating,
+                                                                ),
+                                                            );
+                                                            return;
+                                                        }
+
+                                                        try {
+                                                            final db = await DatabaseHelper.instance.database;
+                                                            await db.update(
+                                                                DatabaseHelper.instance.workoutsTable,
+                                                                {
+                                                                    'exercise': nameCtrl.text.trim(),
+                                                                    'sets': setsParsed,
+                                                                    'reps': repsParsed,
+                                                                    'duration': durParsed ?? 0,
+                                                                    'rpe': rpe ?? 'N/A',
+                                                                    'date_time': editedDateTime.toIso8601String(),
+                                                                },
+                                                                where: 'id = ?',
+                                                                whereArgs: [id],
+                                                            );
+                                                            if (mounted) {
+                                                                Navigator.pop(ctx);
+                                                                await _loadWorkouts();
+                                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                                    const SnackBar(
+                                                                        content: Text('Workout updated'),
+                                                                        behavior: SnackBarBehavior.floating,
+                                                                    ),
+                                                                );
+                                                            }
+                                                        } catch (e) {
+                                                            debugPrint('Update workout error: $e');
+                                                            if (mounted) {
+                                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                                    const SnackBar(
+                                                                        content: Text('Could not update. Try again.'),
+                                                                        behavior: SnackBarBehavior.floating,
+                                                                    ),
+                                                                );
+                                                            }
+                                                        }
+                                                    },
+                                                    child: const Text('Save Changes'),
+                                                ),
+                                            ),
+                                        ],
+                                    ),
+                                ],
+                            ),
+                        ),
+                    ),
+                );
+            },
+        );
+    }
+
     @override
     Widget build(BuildContext context) {
+        super.build(context); // important for AutomaticKeepAliveClientMixin
         final isLight = Theme.of(context).brightness == Brightness.light;
         final bgColor = isLight ? Colors.white : Colors.grey[850];
 
@@ -272,7 +514,7 @@ class _WorkoutLogsScreenState extends State<WorkoutLogsScreen> {
                                         ),
                                         const SizedBox(height: 10),
 
-                                        // Dropdown menu for rep intensity (RPE) with a 1-10 scale
+                                        // Dropdown menu for rep intensity (RPE) with a 1-10 scale (1 easy, 10 max effort)
                                         DropdownButtonFormField<String>(
                                             value: _selectedRPE,
                                             decoration: const InputDecoration(
@@ -374,16 +616,28 @@ class _WorkoutLogsScreenState extends State<WorkoutLogsScreen> {
                                                             ),
                                                             elevation: 3,
                                                             child: ListTile(
-                                                                title: Text(w['exercise'] ?? ''),
+                                                                title: Text(w['exercise']?.toString() ?? ''),
                                                                 subtitle: Text(
                                                                     '${w['sets']} sets × ${w['reps']} reps\n'
                                                                     'Duration: ${w['duration']} min\n'
                                                                     'RPE: ${w['rpe']}\n'
                                                                     'Time: ${DateTimeFormatter.format(DateTime.parse(w['date_time']))}',
                                                                 ),
-                                                                trailing: IconButton(
-                                                                    icon: const Icon(Icons.delete_outline),
-                                                                    onPressed: () => _deleteWorkout(index),
+                                                                // Pencil (edit) + Trash (delete)
+                                                                trailing: Row(
+                                                                    mainAxisSize: MainAxisSize.min,
+                                                                    children: [
+                                                                        IconButton(
+                                                                            tooltip: 'Edit',
+                                                                            icon: const Icon(Icons.edit),
+                                                                            onPressed: () => _editWorkout(index),
+                                                                        ),
+                                                                        IconButton(
+                                                                            tooltip: 'Delete',
+                                                                            icon: const Icon(Icons.delete_outline),
+                                                                            onPressed: () => _deleteWorkout(index),
+                                                                        ),
+                                                                    ],
                                                                 ),
                                                             ),
                                                         ),
