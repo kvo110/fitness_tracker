@@ -31,7 +31,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -78,6 +78,7 @@ class DatabaseHelper {
         workout_name TEXT NOT NULL,
         sets INTEGER NOT NULL,
         reps INTEGER NOT NULL,
+        rpe TEXT,
         FOREIGN KEY(plan_id) REFERENCES $plansTable(id) ON DELETE CASCADE
       )
     ''');
@@ -101,9 +102,14 @@ class DatabaseHelper {
           workout_name TEXT NOT NULL,
           sets INTEGER NOT NULL,
           reps INTEGER NOT NULL,
+          rpe TEXT,
           FOREIGN KEY(plan_id) REFERENCES $plansTable(id) ON DELETE CASCADE
         )
       ''');
+    }
+
+    if (oldVersion < 3) {
+      await db.execute('ALTER TABLE $planWorkoutsTable ADD COLUMN rpe TEXT');
     }
   }
 
