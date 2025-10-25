@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../notifications/notification.dart';
 import '../database/database_helper.dart';
 
@@ -36,6 +37,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   final _notifs = NotificationService();
 
+  // ====== PERSISTENCE KEYS (SharedPreferences) ======
+  static const _kNotifEnabled = 'notif_enabled';
+  static const _kDailyWorkoutEnabled = 'daily_workout_enabled';
+  static const _kDailyWorkoutTime = 'daily_workout_time'; // "HH:mm"
+  static const _kDailyCaloriesEnabled = 'daily_calories_enabled';
+  static const _kDailyCaloriesTime = 'daily_calories_time'; // "HH:mm"
+  static const _kWeeklySummaryEnabled = 'weekly_summary_enabled';
+  static const _kWeeklyWeekday = 'weekly_weekday'; // int 1..7
+  static const _kWeeklyTime = 'weekly_time'; // "HH:mm"
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPrefsAndReschedule(); // Load saved state & reschedule notifications
+  }
+
+  Future<void> _loadPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _notificationsEnabled = prefs.getBool('notifications_enabled') ?? false;
+      _dailyWorkout = prefs.getBool('daily_workout') ?? false;
+      _dailyCalories = prefs.getBool('daily_calories') ?? false;
+      _weeklySummary = prefs.getBool('weekly_summary') ?? false;
+    });
+  }
+
+  Future<void> _savePrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('notifications_enabled', _notificationsEnabled);
+    await prefs.setBool('daily_workout', _dailyWorkout);
+    await prefs.setBool('daily_calories', _dailyCalories);
+    await prefs.setBool('weekly_summary', _weeklySummary);
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -52,8 +87,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           // Theme toggle
           SwitchListTile(
-            title: Text(widget.isDark ? 'Dark Mode Enabled' : 'Light Mode Enabled'),
-            subtitle: Text(widget.isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'),
+            title: Text(
+              widget.isDark ? 'Dark Mode Enabled' : 'Light Mode Enabled',
+            ),
+            subtitle: Text(
+              widget.isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode',
+            ),
             value: widget.isDark,
             onChanged: widget.onToggleTheme,
           ),
@@ -67,6 +106,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             value: _notificationsEnabled,
             onChanged: (v) async {
               setState(() => _notificationsEnabled = v);
+              await _saveBool(_kNotifEnabled, v);
+
               if (!v) {
                 // Turn everything off if global is off
                 setState(() {
@@ -74,9 +115,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   _dailyCalories = false;
                   _weeklySummary = false;
                 });
+                await _saveBool(_kDailyWorkoutEnabled, false);
+                await _saveBool(_kDailyCaloriesEnabled, false);
+                await _saveBool(_kWeeklySummaryEnabled, false);
+
                 await _notifs.cancelAll();
                 _snack('Notifications disabled');
               } else {
+                // Reschedule everything that is individually enabled
+                await _rescheduleAll();
                 _snack('Notifications enabled');
               }
             },
@@ -95,6 +142,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ? null
                   : (v) async {
                       setState(() => _dailyWorkout = v);
+                      await _saveBool(_kDailyWorkoutEnabled, v);
+
                       if (v) {
                         await _notifs.scheduleDaily(
                           id: NotificationService.idDailyWorkout,
@@ -102,9 +151,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           title: 'Time to work out!',
                           body: 'Stay consistent — your session awaits.',
                         );
-                        _snack('Daily workout reminder set for ${_fmt(_dailyWorkoutTime)}');
+                        _snack(
+                          'Daily workout reminder set for ${_fmt(_dailyWorkoutTime)}',
+                        );
                       } else {
-                        await _notifs.cancel(NotificationService.idDailyWorkout);
+                        await _notifs.cancel(
+                          NotificationService.idDailyWorkout,
+                        );
                         _snack('Daily workout reminder off');
                       }
                     },
@@ -122,6 +175,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   );
                   if (picked != null) {
                     setState(() => _dailyWorkoutTime = picked);
+                    await _saveTime(_kDailyWorkoutTime, picked);
+
                     if (_notificationsEnabled && _dailyWorkout) {
                       await _notifs.scheduleDaily(
                         id: NotificationService.idDailyWorkout,
@@ -150,6 +205,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ? null
                   : (v) async {
                       setState(() => _dailyCalories = v);
+                      await _saveBool(_kDailyCaloriesEnabled, v);
+
                       if (v) {
                         await _notifs.scheduleDaily(
                           id: NotificationService.idDailyCalories,
@@ -157,9 +214,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           title: 'Log your calories',
                           body: 'Track your calorie intake for today.',
                         );
-                        _snack('Daily calorie reminder set for ${_fmt(_dailyCaloriesTime)}');
+                        _snack(
+                          'Daily calorie reminder set for ${_fmt(_dailyCaloriesTime)}',
+                        );
                       } else {
-                        await _notifs.cancel(NotificationService.idDailyCalories);
+                        await _notifs.cancel(
+                          NotificationService.idDailyCalories,
+                        );
                         _snack('Daily calorie reminder off');
                       }
                     },
@@ -177,6 +238,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   );
                   if (picked != null) {
                     setState(() => _dailyCaloriesTime = picked);
+                    await _saveTime(_kDailyCaloriesTime, picked);
+
                     if (_notificationsEnabled && _dailyCalories) {
                       await _notifs.scheduleDaily(
                         id: NotificationService.idDailyCalories,
@@ -205,6 +268,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ? null
                   : (v) async {
                       setState(() => _weeklySummary = v);
+                      await _saveBool(_kWeeklySummaryEnabled, v);
+
                       if (v) {
                         await _notifs.scheduleWeekly(
                           id: NotificationService.idWeeklySummary,
@@ -213,9 +278,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           title: 'Weekly summary ready',
                           body: 'Open Insights to review your week.',
                         );
-                        _snack('Weekly summary set for ${_weekdayName(_weeklyWeekday)} @ ${_fmt(_weeklyTime)}');
+                        _snack(
+                          'Weekly summary set for ${_weekdayName(_weeklyWeekday)} @ ${_fmt(_weeklyTime)}',
+                        );
                       } else {
-                        await _notifs.cancel(NotificationService.idWeeklySummary);
+                        await _notifs.cancel(
+                          NotificationService.idWeeklySummary,
+                        );
                         _snack('Weekly summary off');
                       }
                     },
@@ -227,6 +296,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 enabled: _notificationsEnabled && _weeklySummary,
                 onChanged: (val) async {
                   setState(() => _weeklyWeekday = val);
+                  await _saveInt(_kWeeklyWeekday, val);
+
                   if (_notificationsEnabled && _weeklySummary) {
                     await _notifs.scheduleWeekly(
                       id: NotificationService.idWeeklySummary,
@@ -235,7 +306,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       title: 'Weekly summary ready',
                       body: 'Open Insights to review your week.',
                     );
-                    _snack('Rescheduled for ${_weekdayName(_weeklyWeekday)} @ ${_fmt(_weeklyTime)}');
+                    _snack(
+                      'Rescheduled for ${_weekdayName(_weeklyWeekday)} @ ${_fmt(_weeklyTime)}',
+                    );
                   }
                 },
               ),
@@ -252,6 +325,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   );
                   if (picked != null) {
                     setState(() => _weeklyTime = picked);
+                    await _saveTime(_kWeeklyTime, picked);
+
                     if (_notificationsEnabled && _weeklySummary) {
                       await _notifs.scheduleWeekly(
                         id: NotificationService.idWeeklySummary,
@@ -260,7 +335,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         title: 'Weekly summary ready',
                         body: 'Open Insights to review your week.',
                       );
-                      _snack('Rescheduled for ${_weekdayName(_weeklyWeekday)} @ ${_fmt(picked)}');
+                      _snack(
+                        'Rescheduled for ${_weekdayName(_weeklyWeekday)} @ ${_fmt(picked)}',
+                      );
                     }
                   }
                 },
@@ -270,10 +347,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           const SizedBox(height: 24),
 
+          ElevatedButton(
+            onPressed: () {
+              NotificationService().showTestNow(
+                title: 'Test Notification',
+                body: 'This is a test to verify notifications work!',
+              );
+            },
+            child: const Text('Test Notification'),
+          ),
+
           // Data management (clear history)
           Text(
             'Data Management',
-            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 8),
 
@@ -287,7 +376,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onPressed: () => _confirmClear(
                   context: context,
                   title: 'Clear Workout History?',
-                  message: 'This will permanently delete all workout logs. Your saved workout plans will not be touched.',
+                  message:
+                      'This will permanently delete all workout logs. Your saved workout plans will not be touched.',
                   onConfirm: () async {
                     final db = await DatabaseHelper.instance.database;
                     await db.delete(DatabaseHelper.instance.workoutsTable);
@@ -303,7 +393,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onPressed: () => _confirmClear(
                   context: context,
                   title: 'Clear Calorie History?',
-                  message: 'This will permanently delete all calorie entries. Workout plans will remain.',
+                  message:
+                      'This will permanently delete all calorie entries. Workout plans will remain.',
                   onConfirm: () async {
                     final db = await DatabaseHelper.instance.database;
                     await db.delete(DatabaseHelper.instance.caloriesTable);
@@ -319,7 +410,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onPressed: () => _confirmClear(
                   context: context,
                   title: 'Clear All Tracking Data?',
-                  message: 'This will delete all workout logs and calorie entries. Your saved workout plans will be preserved.',
+                  message:
+                      'This will delete all workout logs and calorie entries. Your saved workout plans will be preserved.',
                   onConfirm: () async {
                     final db = await DatabaseHelper.instance.database;
                     await db.delete(DatabaseHelper.instance.workoutsTable);
@@ -369,10 +461,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Expanded(
                 child: Text(
                   title,
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium
-                      ?.copyWith(fontWeight: FontWeight.w600),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
               trailing,
@@ -437,25 +528,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title,
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium
-                      ?.copyWith(fontWeight: FontWeight.w600)),
+              Text(
+                title,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+              ),
               const SizedBox(height: 2),
-              Text(subtitle,
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodySmall
-                      ?.copyWith(color: onSurf.withOpacity(0.75))),
+              Text(
+                subtitle,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: onSurf.withOpacity(0.75),
+                ),
+              ),
             ],
           ),
         ),
         TextButton(
           onPressed: onPressed,
-          style: TextButton.styleFrom(
-            foregroundColor: danger,
-          ),
+          style: TextButton.styleFrom(foregroundColor: danger),
           child: const Text('Clear'),
         ),
       ],
@@ -476,8 +567,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         Text(
           _fmt(time),
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
-              ),
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+          ),
         ),
         const SizedBox(width: 8),
         ElevatedButton(
@@ -511,10 +602,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           value: current,
           onChanged: enabled ? (v) => onChanged(v ?? current) : null,
           items: days.entries
-              .map((e) => DropdownMenuItem<int>(
-                    value: e.key,
-                    child: Text(e.value),
-                  ))
+              .map(
+                (e) =>
+                    DropdownMenuItem<int>(value: e.key, child: Text(e.value)),
+              )
               .toList(),
         ),
       ],
@@ -550,6 +641,124 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (ok == true) {
       await onConfirm();
     }
+  }
+
+  // ====== PERSISTENCE HELPERS ======
+
+  Future<void> _loadPrefsAndReschedule() async {
+    final sp = await SharedPreferences.getInstance();
+
+    // Read toggles
+    final notifEnabled = sp.getBool(_kNotifEnabled) ?? false;
+    final dailyWorkoutEnabled = sp.getBool(_kDailyWorkoutEnabled) ?? false;
+    final dailyCaloriesEnabled = sp.getBool(_kDailyCaloriesEnabled) ?? false;
+    final weeklySummaryEnabled = sp.getBool(_kWeeklySummaryEnabled) ?? false;
+
+    // Read times (stored as "HH:mm")
+    final dailyWorkoutTimeStr = sp.getString(_kDailyWorkoutTime);
+    final dailyCaloriesTimeStr = sp.getString(_kDailyCaloriesTime);
+    final weeklyTimeStr = sp.getString(_kWeeklyTime);
+
+    // Read weekday
+    final weeklyWeekday = sp.getInt(_kWeeklyWeekday);
+
+    setState(() {
+      _notificationsEnabled = notifEnabled;
+
+      _dailyWorkout = dailyWorkoutEnabled;
+      _dailyCalories = dailyCaloriesEnabled;
+      _weeklySummary = weeklySummaryEnabled;
+
+      if (dailyWorkoutTimeStr != null) {
+        _dailyWorkoutTime =
+            _parseTime(dailyWorkoutTimeStr) ?? _dailyWorkoutTime;
+      }
+      if (dailyCaloriesTimeStr != null) {
+        _dailyCaloriesTime =
+            _parseTime(dailyCaloriesTimeStr) ?? _dailyCaloriesTime;
+      }
+      if (weeklyTimeStr != null) {
+        _weeklyTime = _parseTime(weeklyTimeStr) ?? _weeklyTime;
+      }
+      if (weeklyWeekday != null) {
+        _weeklyWeekday = weeklyWeekday;
+      }
+    });
+
+    // Reschedule notifications according to saved state
+    await _rescheduleAll();
+  }
+
+  Future<void> _rescheduleAll() async {
+    if (!_notificationsEnabled) {
+      await _notifs.cancelAll();
+      return;
+    }
+
+    if (_dailyWorkout) {
+      await _notifs.scheduleDaily(
+        id: NotificationService.idDailyWorkout,
+        time: _dailyWorkoutTime,
+        title: 'Time to work out!',
+        body: 'Stay consistent — your session awaits.',
+      );
+    } else {
+      await _notifs.cancel(NotificationService.idDailyWorkout);
+    }
+
+    if (_dailyCalories) {
+      await _notifs.scheduleDaily(
+        id: NotificationService.idDailyCalories,
+        time: _dailyCaloriesTime,
+        title: 'Log your calories',
+        body: 'Track your calorie intake for today.',
+      );
+    } else {
+      await _notifs.cancel(NotificationService.idDailyCalories);
+    }
+
+    if (_weeklySummary) {
+      await _notifs.scheduleWeekly(
+        id: NotificationService.idWeeklySummary,
+        weekday: _weeklyWeekday,
+        time: _weeklyTime,
+        title: 'Weekly summary ready',
+        body: 'Open Insights to review your week.',
+      );
+    } else {
+      await _notifs.cancel(NotificationService.idWeeklySummary);
+    }
+  }
+
+  Future<void> _saveBool(String key, bool value) async {
+    final sp = await SharedPreferences.getInstance();
+    await sp.setBool(key, value);
+  }
+
+  Future<void> _saveInt(String key, int value) async {
+    final sp = await SharedPreferences.getInstance();
+    await sp.setInt(key, value);
+  }
+
+  Future<void> _saveTime(String key, TimeOfDay t) async {
+    final sp = await SharedPreferences.getInstance();
+    final str = _timeToString(t); // "HH:mm"
+    await sp.setString(key, str);
+  }
+
+  String _timeToString(TimeOfDay t) {
+    final hh = t.hour.toString().padLeft(2, '0');
+    final mm = t.minute.toString().padLeft(2, '0');
+    return '$hh:$mm';
+  }
+
+  TimeOfDay? _parseTime(String s) {
+    final parts = s.split(':');
+    if (parts.length != 2) return null;
+    final hh = int.tryParse(parts[0]);
+    final mm = int.tryParse(parts[1]);
+    if (hh == null || mm == null) return null;
+    return TimeOfDay(hour: hh, minute: mm);
   }
 
   String _fmt(TimeOfDay t) {

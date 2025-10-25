@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
 
 // importing the screens files
 import 'screens/home_screen.dart';
@@ -7,7 +8,7 @@ import 'screens/workout_plans_screen.dart';
 import 'screens/calorie_screen.dart';
 import 'screens/insights_screen.dart'; // Updated name to follow the updated label of progress_screen.dart to insights_screen.dart
 import 'screens/settings_screen.dart';
-import 'notifications/notification.dart'; // notification file 
+import 'notifications/notification.dart'; // notification file
 
 // import widgets
 import 'widgets/nav_bar.dart';
@@ -15,6 +16,7 @@ import 'widgets/nav_bar.dart';
 // Entry point of the Fitness App
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  tz.initializeTimeZones();
   await NotificationService().init();
   runApp(const FitnessApp());
 }
@@ -50,9 +52,7 @@ class _FitnessAppState extends State<FitnessApp> {
         onTertiary: Colors.white,
         onError: Colors.white,
       ),
-      textTheme: const TextTheme(
-        bodyMedium: TextStyle(color: Colors.black),
-      ),
+      textTheme: const TextTheme(bodyMedium: TextStyle(color: Colors.black)),
     );
 
     // Dark theme
@@ -72,16 +72,12 @@ class _FitnessAppState extends State<FitnessApp> {
         onTertiary: Colors.white,
         onError: Colors.white,
       ),
-      textTheme: const TextTheme(
-        bodyMedium: TextStyle(color: Colors.white),
-      ),
+      textTheme: const TextTheme(bodyMedium: TextStyle(color: Colors.white)),
     );
 
-    // Define each screen in the nav bar 
+    // Define each screen in the nav bar
     final List<Widget> tabs = [
-      HomeScreen(
-        onOpenWorkout: () => setState(() => _index = 1),
-      ),
+      HomeScreen(onOpenWorkout: () => setState(() => _index = 1)),
       const WorkoutLogsScreen(),
       const WorkoutPlansScreen(),
       const CalorieScreen(),
