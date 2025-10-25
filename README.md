@@ -1,4 +1,5 @@
-Presentation Link: https://docs.google.com/presentation/d/1l53pusCnpsN_rfT1zInnvA3laEJqYPyn0shm3MZpVug/edit?usp=sharing
+Presentation Slides Link: https://docs.google.com/presentation/d/1l53pusCnpsN_rfT1zInnvA3laEJqYPyn0shm3MZpVug/edit?usp=sharing
+Youtube Recording Link: 
 
 Previous implementations from personal assignments used for certain features
 - Wednesday Oct 8;
